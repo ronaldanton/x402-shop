@@ -9,9 +9,11 @@
   "scripts": {
     "start": "node src/server.js",
     "test:402": "node scripts/test-402.js",
-    "buyer": "node scripts/buy.js"
+    "buyer": "node scripts/buy.js",
+    "mcp": "node mcp-server.js"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "@x402/evm": "^2.22.0",
     "@x402/express": "^2.22.0",
     "@x402/extensions": "^2.22.0",

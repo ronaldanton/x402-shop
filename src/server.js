@@ -54,9 +54,10 @@ app.get("/.well-known/x402", (req, res) => {
     description: "Pay-per-call AI microservices (x402 / MPP)",
     website: process.env.PUBLIC_URL || `http://localhost:${PORT}`,
     endpoints: [
-      { path: "/v1/summarize", method: "POST", price: "$0.01", description: "Summarize text (200-20k chars). Returns 250-word summary." },
-      { path: "/v1/classify-insurance", method: "POST", price: "$0.02", description: "Classify insurance lead: intent, urgency, line-of-business, quote-range." },
-      { path: "/v1/extract", method: "POST", price: "$0.03", description: "Extract structured key-value fields from raw text (emails, forms)." },
+      { path: "/v1/summarize", method: "POST", price: "$0.01", description: "AI text summarization — 250-word summary of any text up to 20k chars" },
+      { path: "/v1/classify-insurance", method: "POST", price: "$0.02", description: "Insurance lead classifier — intent, urgency, line of business" },
+      { path: "/v1/extract", method: "POST", price: "$0.03", description: "Structured field extraction — key-value pairs from emails, forms, documents" },
+      { path: "/v1/insurance-analysis", method: "POST", price: "$0.10", description: "Full insurance analysis bundle — classification + extraction + summary" },
     ],
   });
 });
@@ -81,46 +82,21 @@ app.use(
         accepts: [{ scheme: "exact", price: "$0.01", network: NETWORK, payTo: PAY_TO }],
         description: "AI text summarization — produces a 250-word summary of any text up to 20k characters",
         mimeType: "application/json",
-        extensions: {
-          ...declareDiscoveryExtension({
-            input: { text: "Your text to summarize..." },
-            inputSchema: {
-              properties: { text: { type: "string", description: "Text to summarize (200-20000 chars)" } },
-              required: ["text"],
-            },
-          }),
-        },
       },
       "POST /v1/classify-insurance": {
         accepts: [{ scheme: "exact", price: "$0.02", network: NETWORK, payTo: PAY_TO }],
         description: "Insurance lead classifier — identifies intent, urgency, and line of business from customer messages",
         mimeType: "application/json",
-        extensions: {
-          ...declareDiscoveryExtension({
-            input: { text: "Customer message about their insurance needs..." },
-            inputSchema: {
-              properties: { text: { type: "string", description: "Customer message or inquiry to classify" } },
-              required: ["text"],
-            },
-          }),
-        },
       },
       "POST /v1/extract": {
         accepts: [{ scheme: "exact", price: "$0.03", network: NETWORK, payTo: PAY_TO }],
         description: "Structured field extraction — pulls key-value pairs from emails, forms, and documents",
         mimeType: "application/json",
-        extensions: {
-          ...declareDiscoveryExtension({
-            input: { text: "Raw text from email or document..." },
-            inputSchema: {
-              properties: {
-                text: { type: "string", description: "Raw text to extract fields from" },
-                fields: { type: "array", items: { type: "string" }, description: "Optional: specific fields to extract" },
-              },
-              required: ["text"],
-            },
-          }),
-        },
+      },
+      "POST /v1/insurance-analysis": {
+        accepts: [{ scheme: "exact", price: "$0.10", network: NETWORK, payTo: PAY_TO }],
+        description: "Full insurance analysis bundle — classification + field extraction + summary in one call",
+        mimeType: "application/json",
       },
     },
     new x402ResourceServer(facilitatorClient).register(NETWORK, new ExactEvmScheme()),
@@ -175,7 +151,7 @@ app.post("/v1/extract", async (req, res) => {
   if (!text) return res.status(400).json({ error: "field 'text' required" });
   try {
     const want = Array.isArray(fields) && fields.length ? fields.join(", ") : "all key-value pairs";
-    const out = await ollamaChat(process.env.MODEL_EXTRACT || "gemma3:1b", [
+    const out = await ollamaChat(process.env.MODEL_EXTRACT || "gemma4:31b-cloud", [
       { role: "system", content: `Extract structured fields (${want}) from the text. Respond ONLY with a JSON object of field->value.` },
       { role: "user", content: String(text).slice(0, 20000) },
     ]);
@@ -184,6 +160,43 @@ app.post("/v1/extract", async (req, res) => {
     res.json(parsed);
   } catch (e) {
     record({ ts: new Date().toISOString(), service: "extract", status: "error", usd: 0, error: String(e).slice(0, 200) });
+    res.status(502).json({ error: "upstream AI failed" });
+  }
+});
+
+// ---------- PREMIUM: Full Insurance Analysis ($0.10) ----------
+app.post("/v1/insurance-analysis", async (req, res) => {
+  const { text } = req.body || {};
+  if (!text || typeof text !== "string") return res.status(400).json({ error: "field 'text' required" });
+  if (text.length > 20000) return res.status(400).json({ error: "text too long (max 20000 chars)" });
+  try {
+    const model = process.env.MODEL_CLASSIFY || "gemma4:31b-cloud";
+    const [classifyOut, extractOut, summaryOut] = await Promise.all([
+      ollamaChat(model, [
+        { role: "system", content: 'Classify this insurance lead. Respond ONLY with JSON: {"intent":"quote_request|renewal|claim|complaint|other","urgency":"low|medium|high","line":"auto|home|life|health|commercial|other","confidence":0.0,"recommended_action":"..." }' },
+        { role: "user", content: text },
+      ]),
+      ollamaChat(model, [
+        { role: "system", content: "Extract all key-value fields from this text (names, dates, amounts, policies, vehicles, addresses, etc). Respond ONLY with a JSON object." },
+        { role: "user", content: text.slice(0, 20000) },
+      ]),
+      ollamaChat(model, [
+        { role: "system", content: "Summarize this insurance communication in 2-3 sentences. Output only the summary." },
+        { role: "user", content: text },
+      ]),
+    ]);
+    let classification; try { classification = JSON.parse(classifyOut.trim().replace(/^```(json)?|```$/g, "")); } catch { classification = { raw: classifyOut }; }
+    let extracted; try { extracted = JSON.parse(extractOut.trim().replace(/^```(json)?|```$/g, "")); } catch { extracted = { raw: extractOut }; }
+    record({ ts: new Date().toISOString(), service: "insurance-analysis", status: "paid", usd: 0.10, payer: payerOf(req) });
+    res.json({
+      classification,
+      extracted_fields: extracted,
+      summary: summaryOut.trim(),
+      confidence: classification.confidence || 0,
+      recommended_action: classification.recommended_action || "review_manually",
+    });
+  } catch (e) {
+    record({ ts: new Date().toISOString(), service: "insurance-analysis", status: "error", usd: 0, error: String(e).slice(0, 200) });
     res.status(502).json({ error: "upstream AI failed" });
   }
 });
@@ -215,13 +228,14 @@ No accounts. No API keys. Pay per call in USDC.</p>
 <div>
 <div class="stat"><b>${"$" + (ledger.filter(e=>e.status==="paid").reduce((s,e)=>s+(e.usd||0),0)).toFixed(2)}</b>gross revenue</div>
 <div class="stat"><b>${ledger.filter(e=>e.status==="paid").length}</b>paid requests</div>
-<div class="stat"><b>3</b>services live</div>
+<div class="stat"><b>4</b>services live</div>
 </div>
 <h2>Services &amp; pricing</h2>
 <table><tr><th>Endpoint</th><th>Price</th><th>Description</th></tr>
 <tr><td><code>POST /v1/summarize</code></td><td>$0.01</td><td>Summarize text (up to 20k chars)</td></tr>
 <tr><td><code>POST /v1/classify-insurance</code></td><td>$0.02</td><td>Insurance lead classification (intent/urgency/line)</td></tr>
 <tr><td><code>POST /v1/extract</code></td><td>$0.03</td><td>Structured field extraction</td></tr>
+<tr style="background:#141925"><td><code>POST /v1/insurance-analysis</code></td><td><b>$0.10</b></td><td><b>⭐ FULL BUNDLE</b> — classification + extraction + summary</td></tr>
 </table>
 <h2>Pay like a machine</h2>
 <pre><code># 1. Get the price (no payment attached)
