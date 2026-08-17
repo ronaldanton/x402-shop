@@ -1,23 +1,23 @@
-# x402-shop Submission Checklist
+# AgentPay Submission Checklist
 
 ## 🎯 PRIORITY 1 — Do Today (15 minutes)
 
 ### Reddit (Post from your account)
-- [ ] Post on r/x402 → Content: `/root/x402-shop/marketing/reddit-post.md`
+- [ ] Post on r/x402 → Content: `/root/AgentPay/marketing/reddit-post.md`
 - [ ] Post on r/SideProject → Same content
 - [ ] Post on r/AutoGPT → Same content
 
 ### AgentLocker.ai (Free submission)
 - [ ] Go to: https://agentlocker.ai/submit-your-tool
-- [ ] Name: `x402-shop`
-- [ ] URL: `https://github.com/ronaldanton/x402-shop`
+- [ ] Name: `AgentPay`
+- [ ] URL: `https://github.com/ronaldanton/AgentPay`
 - [ ] Description: AI services behind HTTP 402 paywall. No accounts, no API keys — just pay with USDC on Base. Summarize ($0.01), classify insurance ($0.02), extract fields ($0.03).
 - [ ] Category: AI Agent Platform
 - [ ] Tags: x402, payments, AI, USDC, Base, insurance, API
 
 ### theresanaiforthat.com (Free submission)
 - [ ] Go to: https://theresanaiforthat.com/submit/
-- [ ] Name: `x402-shop`
+- [ ] Name: `AgentPay`
 - [ ] URL: `https://yard-singer-minus-drain.trycloudflare.com`
 - [ ] Description: AI services behind HTTP 402 paywall. Pay with USDC, no accounts needed.
 - [ ] Category: AI Agents / Developer Tools
@@ -28,20 +28,20 @@
 
 ### Product Hunt
 - [ ] Go to: https://www.producthunt.com/posts/new
-- [ ] Name: `x402-shop`
+- [ ] Name: `AgentPay`
 - [ ] Tagline: AI services that accept crypto payments — no accounts needed
 - [ ] Description: AI services behind HTTP 402 paywall. Summarize, classify, extract — all for pennies in USDC.
-- [ ] Website: `https://github.com/ronaldanton/x402-shop`
+- [ ] Website: `https://github.com/ronaldanton/AgentPay`
 - [ ] Topics: AI, Cryptocurrency, Developer Tools
 
 ### Hacker News
 - [ ] Go to: https://news.ycombinator.com/submit
-- [ ] Title: `Show HN: x402-shop – AI services that accept USDC payments via HTTP 402`
-- [ ] URL: `https://github.com/ronaldanton/x402-shop`
+- [ ] Title: `Show HN: AgentPay – AI services that accept USDC payments via HTTP 402`
+- [ ] URL: `https://github.com/ronaldanton/AgentPay`
 
 ### Dev.to
 - [ ] Go to: https://dev.to/new
-- [ ] Content: `/root/x402-shop/marketing/devto-article.md`
+- [ ] Content: `/root/AgentPay/marketing/devto-article.md`
 
 ### Medium
 - [ ] Go to: https://medium.com/new-story
@@ -53,7 +53,7 @@
 
 ### GitHub Discussions
 - [ ] Post on: https://github.com/coinbase/x402/discussions
-- [ ] Title: `Showcase: x402-shop — AI services behind HTTP 402 paywall`
+- [ ] Title: `Showcase: AgentPay — AI services behind HTTP 402 paywall`
 
 ### Twitter/X Engagement
 - [ ] Follow: @x402protocol, @coinbase, @stripe
@@ -77,10 +77,10 @@
 ### Daily Checks
 ```bash
 # Check Bazaar registration
-curl -s "https://facilitator.payai.network/discovery/resources" | python3 -c "import sys,json; d=json.load(sys.stdin); print([r for r in d.get('resources',[]) if 'x402-shop' in str(r)])"
+curl -s "https://facilitator.payai.network/discovery/resources" | python3 -c "import sys,json; d=json.load(sys.stdin); print([r for r in d.get('resources',[]) if 'AgentPay' in str(r)])"
 
 # Check GitHub stars
-curl -s "https://api.github.com/repos/ronaldanton/x402-shop" | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'Stars: {d.get(\"stargazers_count\",0)}')"
+curl -s "https://api.github.com/repos/ronaldanton/AgentPay" | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'Stars: {d.get(\"stargazers_count\",0)}')"
 ```
 
 ### Track These Metrics

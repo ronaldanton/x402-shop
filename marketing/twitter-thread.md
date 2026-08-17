@@ -1,4 +1,4 @@
-# x402-shop Twitter/X Launch Thread
+# AgentPay Twitter/X Launch Thread
 
 ---
 
@@ -17,9 +17,9 @@ What if they could just... pay? 💸
 
 ---
 
-**Tweet 2 — INTRODUCING x402-shop 🛒**
+**Tweet 2 — INTRODUCING AgentPay 🛒**
 
-Introducing x402-shop — AI services behind an HTTP 402 paywall.
+Introducing AgentPay — AI services behind an HTTP 402 paywall.
 
 No accounts. No API keys. No BS.
 
@@ -66,7 +66,7 @@ Total cost to try all three: $0.06 🪙
 
 **Tweet 5 — UNDER THE HOOD ⚙️**
 
-What powers x402-shop:
+What powers AgentPay:
 
 🔧 **x402 Protocol** — HTTP 402 payment enforcement
 ⛓️ **Base Mainnet** — fast, cheap L2 settlement
@@ -98,7 +98,7 @@ The agent economy is here. Are you building for it? 👀
 
 **Tweet 7 — CLOSING 🔥**
 
-x402-shop is proof that the x402 ecosystem works.
+AgentPay is proof that the x402 ecosystem works.
 
 • Coinbase is investing in it
 • Stripe is building MPP alongside it

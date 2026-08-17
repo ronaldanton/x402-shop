@@ -1,10 +1,10 @@
-# x402-shop
+# AgentPay
 
 > **Machine-payable AI microservices via the [402 Payment Required](https://x402.org) protocol (x402 / MPP)**
 
 No accounts. No API keys. No OAuth. Pay per call in USDC on Base.
 
-x402-shop is an open-source reference implementation of the [Machine Payments Protocol](https://x402.org) — wrapping local AI models behind an HTTP 402 paywall so that AI agents (and humans) can pay for compute on a per-request basis using stablecoins.
+AgentPay is an open-source reference implementation of the [Machine Payments Protocol](https://x402.org) — wrapping local AI models behind an HTTP 402 paywall so that AI agents (and humans) can pay for compute on a per-request basis using stablecoins.
 
 Built with Express 5, `@x402/express`, and Ollama-served Gemma models. Live on Base mainnet with the PayAI facilitator.
 
@@ -35,8 +35,8 @@ Built with Express 5, `@x402/express`, and Ollama-served Gemma models. Live on B
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/your-org/x402-shop.git
-cd x402-shop
+git clone https://github.com/your-org/AgentPay.git
+cd AgentPay
 npm install
 ```
 
@@ -59,7 +59,7 @@ cp .env.example .env
 
 ```bash
 npm start
-# x402-shop listening on :4021
+# AgentPay listening on :4021
 #   payTo:   0xYourWalletAddress
 #   network: eip155:84532 (Base Sepolia testnet)
 #   facilitator: https://x402.org/facilitator
@@ -94,7 +94,7 @@ npm run buyer -- /v1/summarize ./payload.json
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        x402-shop Architecture                   │
+│                        AgentPay Architecture                   │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ┌──────────┐    HTTP POST     ┌───────────────────────────┐    │
@@ -283,7 +283,7 @@ Machine-readable service catalog (Bazaar discovery extension). Use this for auto
 
 ```json
 {
-  "name": "x402-shop",
+  "name": "AgentPay",
   "description": "Pay-per-call AI microservices (x402 / MPP)",
   "endpoints": [
     { "path": "/v1/summarize", "method": "POST", "price": "$0.01", "description": "Summarize text (200-20k chars)" },
@@ -420,8 +420,8 @@ Contributions are welcome! This is an open-source reference implementation of th
 ### Development Setup
 
 ```bash
-git clone https://github.com/your-org/x402-shop.git
-cd x402-shop
+git clone https://github.com/your-org/AgentPay.git
+cd AgentPay
 npm install
 cp .env.example .env
 # Edit .env with your test wallet and Base Sepolia settings

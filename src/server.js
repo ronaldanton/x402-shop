@@ -1,4 +1,4 @@
-// x402-shop — MPP/x402 paywalled AI microservices
+// AgentPay — MPP/x402 paywalled AI microservices
 // Seller server. Accepts USDC (testnet now, mainnet-ready) per request.
 import "dotenv/config";
 import express from "express";
@@ -50,7 +50,7 @@ app.get("/", (req, res) => {
 app.get("/.well-known/x402", (req, res) => {
   // Bazaar-style discovery: machine-readable catalog of paid endpoints
   res.json({
-    name: "x402-shop",
+    name: "AgentPay",
     description: "Pay-per-call AI microservices (x402 / MPP)",
     website: process.env.PUBLIC_URL || `http://localhost:${PORT}`,
     endpoints: [
@@ -85,7 +85,7 @@ app.use(
         accepts: [{ scheme: "exact", price: "$0.01", network: NETWORK, payTo: PAY_TO }],
         description: "AI text summarization — produces a 250-word summary of any text up to 20k characters",
         mimeType: "application/json",
-        serviceName: "x402-shop Summarize",
+        serviceName: "AgentPay Summarize",
         tags: ["summarize", "text", "AI", "x402"],
         extensions: {
           bazaar: {
@@ -100,7 +100,7 @@ app.use(
         accepts: [{ scheme: "exact", price: "$0.02", network: NETWORK, payTo: PAY_TO }],
         description: "Insurance lead classifier — identifies intent, urgency, and line of business from customer messages",
         mimeType: "application/json",
-        serviceName: "x402-shop Insurance Classifier",
+        serviceName: "AgentPay Insurance Classifier",
         tags: ["insurance", "classify", "AI", "x402"],
         extensions: {
           bazaar: {
@@ -115,7 +115,7 @@ app.use(
         accepts: [{ scheme: "exact", price: "$0.03", network: NETWORK, payTo: PAY_TO }],
         description: "Structured field extraction — pulls key-value pairs from emails, forms, and documents",
         mimeType: "application/json",
-        serviceName: "x402-shop Field Extractor",
+        serviceName: "AgentPay Field Extractor",
         tags: ["extract", "fields", "AI", "x402"],
         extensions: {
           bazaar: {
@@ -130,7 +130,7 @@ app.use(
         accepts: [{ scheme: "exact", price: "$0.10", network: NETWORK, payTo: PAY_TO }],
         description: "Full insurance analysis bundle — classification + field extraction + summary in one call",
         mimeType: "application/json",
-        serviceName: "x402-shop Full Analysis",
+        serviceName: "AgentPay Full Analysis",
         tags: ["insurance", "analysis", "bundle", "AI", "x402"],
         extensions: {
           bazaar: {
@@ -145,7 +145,7 @@ app.use(
         accepts: [{ scheme: "exact", price: "$0.05", network: NETWORK, payTo: PAY_TO }],
         description: "AI code review — bugs, security, performance, quality analysis",
         mimeType: "application/json",
-        serviceName: "x402-shop Code Review",
+        serviceName: "AgentPay Code Review",
         tags: ["code", "review", "AI", "x402", "security"],
         extensions: {
           bazaar: {
@@ -160,7 +160,7 @@ app.use(
         accepts: [{ scheme: "exact", price: "$0.02", network: NETWORK, payTo: PAY_TO }],
         description: "Sentiment analysis — positive/negative/neutral with emotions and keywords",
         mimeType: "application/json",
-        serviceName: "x402-shop Sentiment",
+        serviceName: "AgentPay Sentiment",
         tags: ["sentiment", "analysis", "AI", "x402", "nlp"],
         extensions: {
           bazaar: {
@@ -175,7 +175,7 @@ app.use(
         accepts: [{ scheme: "exact", price: "$0.03", network: NETWORK, payTo: PAY_TO }],
         description: "Text translation — translate to any language",
         mimeType: "application/json",
-        serviceName: "x402-shop Translate",
+        serviceName: "AgentPay Translate",
         tags: ["translate", "language", "AI", "x402"],
         extensions: {
           bazaar: {
@@ -352,7 +352,7 @@ function payerOf(req) {
 
 // ---------- Landing page ----------
 function indexPage() {
-  return `<!doctype html><html><head><meta charset="utf-8"><title>x402-shop</title>
+  return `<!doctype html><html><head><meta charset="utf-8"><title>AgentPay</title>
 <style>
 :root{color-scheme:dark}
 body{font-family:ui-monospace,Menlo,monospace;background:#0b0e14;color:#d5d9e0;margin:0;padding:2rem;max-width:60rem;margin-inline:auto}
@@ -365,8 +365,8 @@ a{color:#6ee7a0}
 .stat{display:inline-block;background:#141925;border:1px solid #2a2f3a;padding:.75rem 1.25rem;border-radius:8px;margin:.25rem;min-width:9rem}
 .stat b{display:block;font-size:1.4rem;color:#6ee7a0}
 </style></head><body>
-<h1>x402-shop</h1>
-<p>Machine-payable AI microservices via the <b>402 Payment Required</b> protocol (x402 / MPP).
+<h1>AgentPay</h1>
+<p>AgentPay — AI services that agents pay for via the <b>402 Payment Required</b> protocol (x402 / MPP).
 No accounts. No API keys. Pay per call in USDC.</p>
 <div>
 <div class="stat"><b>${"$" + (ledger.filter(e=>e.status==="paid").reduce((s,e)=>s+(e.usd||0),0)).toFixed(2)}</b>gross revenue</div>
@@ -398,7 +398,7 @@ x402 fetch pays & returns your result. See README.</code></pre>
 }
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`x402-shop listening on :${PORT}`);
+  console.log(`AgentPay listening on :${PORT}`);
   console.log(`  payTo:   ${PAY_TO}`);
   console.log(`  network: ${NETWORK} (Base Sepolia testnet)`);
   console.log(`  facilitator: ${FACILITATOR}`);

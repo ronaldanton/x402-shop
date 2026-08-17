@@ -1,12 +1,12 @@
 # Reddit Post for r/x402
 
-**Title:** Built x402-shop — AI services behind HTTP 402 paywall (summarize, classify, extract)
+**Title:** Built AgentPay — AI services behind HTTP 402 paywall (summarize, classify, extract)
 
 ---
 
 Hey r/x402 community! 👋
 
-I just built **x402-shop** — a live reference implementation of the x402 protocol for selling AI services.
+I just built **AgentPay** — a live reference implementation of the x402 protocol for selling AI services.
 
 ## What it does
 
@@ -42,7 +42,7 @@ Three AI services behind an HTTP 402 paywall:
 
 ## Open source
 
-GitHub: https://github.com/ronaldanton/x402-shop
+GitHub: https://github.com/ronaldanton/AgentPay
 
 Clone it, fork it, build your own. The README has a full quick start guide.
 

@@ -1,10 +1,10 @@
-# x402-shop Growth Engine — Complete Marketing Package
+# AgentPay Growth Engine — Complete Marketing Package
 
 ## 🔥 IMMEDIATE ACTIONS (Do These First)
 
 ### 1. Reddit r/x402 (ACTIVE — people are building x402 services!)
 
-**Post title:** Built x402-shop — AI services behind HTTP 402 paywall (summarize, classify, extract)
+**Post title:** Built AgentPay — AI services behind HTTP 402 paywall (summarize, classify, extract)
 
 **Post body:** (copy from `/tmp/reddit-post-x402.md`)
 
@@ -22,8 +22,8 @@
 **URL:** https://agentlocker.ai/submit-your-tool
 
 **Fill in:**
-- Name: x402-shop
-- URL: https://github.com/ronaldanton/x402-shop
+- Name: AgentPay
+- URL: https://github.com/ronaldanton/AgentPay
 - Description: AI services behind HTTP 402 paywall. No accounts, no API keys — just pay with USDC on Base. Summarize ($0.01), classify insurance ($0.02), extract fields ($0.03).
 - Category: AI Agent Platform / AI Agents
 - Tags: x402, payments, AI, USDC, Base, insurance, API
@@ -33,7 +33,7 @@
 **URL:** https://theresanaiforthat.com/submit/
 
 **Fill in:**
-- Name: x402-shop
+- Name: AgentPay
 - URL: https://yard-singer-minus-drain.trycloudflare.com
 - Description: AI services behind HTTP 402 paywall. Pay with USDC, no accounts needed.
 - Category: AI Agents / Developer Tools
@@ -43,19 +43,19 @@
 **URL:** https://www.producthunt.com/posts/new
 
 **Prepare:**
-- Name: x402-shop
+- Name: AgentPay
 - Tagline: AI services that accept crypto payments — no accounts needed
 - Description: AI services behind HTTP 402 paywall. Summarize, classify, extract — all for pennies in USDC.
-- Website: https://github.com/ronaldanton/x402-shop
+- Website: https://github.com/ronaldanton/AgentPay
 - Topics: AI, Cryptocurrency, Developer Tools
 
 ### 5. Hacker News "Show HN"
 
 **URL:** https://news.ycombinator.com/submit
 
-**Post title:** Show HN: x402-shop – AI services that accept USDC payments via HTTP 402
+**Post title:** Show HN: AgentPay – AI services that accept USDC payments via HTTP 402
 
-**Post body:** I built x402-shop, a live reference implementation of the x402 protocol for selling AI services. Three services: summarize ($0.01), insurance classifier ($0.02), field extractor ($0.03). Built with @x402/express on Base Mainnet. Open source on GitHub.
+**Post body:** I built AgentPay, a live reference implementation of the x402 protocol for selling AI services. Three services: summarize ($0.01), insurance classifier ($0.02), field extractor ($0.03). Built with @x402/express on Base Mainnet. Open source on GitHub.
 
 ---
 
@@ -79,17 +79,17 @@
 
 **Title:** "The Machine-to-Machine Economy is Here — I Built a Store for AI Agents"
 
-**Angle:** Storytelling about building x402-shop, the x402 protocol, and the future of agent-to-agent commerce.
+**Angle:** Storytelling about building AgentPay, the x402 protocol, and the future of agent-to-agent commerce.
 
 ### Twitter/X Thread
 
-**Already created:** `/root/x402-shop/marketing/twitter-thread.md`
+**Already created:** `/root/AgentPay/marketing/twitter-thread.md`
 
 ### YouTube Video Script
 
 **Title:** "I Built an AI Service That Accepts Crypto Payments in 30 Minutes"
 
-**Content:** Screen recording of building x402-shop from scratch, explaining x402 protocol, showing the 402 handshake flow.
+**Content:** Screen recording of building AgentPay from scratch, explaining x402 protocol, showing the 402 handshake flow.
 
 ---
 
@@ -99,13 +99,13 @@
 
 **Join:** https://docs.x402.org/community (check for Discord/Slack links)
 
-**Post:** Share x402-shop as a reference implementation, ask for feedback on the schema.
+**Post:** Share AgentPay as a reference implementation, ask for feedback on the schema.
 
 ### GitHub Discussions
 
 **Post on:** https://github.com/coinbase/x402/discussions
 
-**Title:** Showcase: x402-shop — AI services behind HTTP 402 paywall
+**Title:** Showcase: AgentPay — AI services behind HTTP 402 paywall
 
 **Content:** Share the project, ask for feedback, offer to help others implement x402.
 
@@ -134,8 +134,8 @@
 
 ### Daily Routine:
 
-1. Check Bazaar: `curl -s https://facilitator.payai.network/discovery/resources | python3 -c "import sys,json; d=json.load(sys.stdin); print([r for r in d.get('resources',[]) if 'x402-shop' in str(r)])"`
-2. Check GitHub stars: `curl -s https://api.github.com/repos/ronaldanton/x402-shop | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'Stars: {d.get(\"stargazers_count\",0)}')"`
+1. Check Bazaar: `curl -s https://facilitator.payai.network/discovery/resources | python3 -c "import sys,json; d=json.load(sys.stdin); print([r for r in d.get('resources',[]) if 'AgentPay' in str(r)])"`
+2. Check GitHub stars: `curl -s https://api.github.com/repos/ronaldanton/AgentPay | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'Stars: {d.get(\"stargazers_count\",0)}')"`
 3. Check wallet: `curl -s "https://sepolia.basescan.org/api?module=account&action=txlist&address=SELLER_ADDRESS&sort=desc&apikey=YOUR_KEY"`
 
 ---

@@ -30,9 +30,9 @@ The x402 protocol (backed by Coinbase and Stripe) fixes this. It uses the HTTP 4
 
 No accounts. No API keys. Just crypto.
 
-## What I Built: x402-shop
+## What I Built: AgentPay
 
-I built **x402-shop** — three AI services behind an HTTP 402 paywall:
+I built **AgentPay** — three AI services behind an HTTP 402 paywall:
 
 | Service | Price | What It Does |
 |---------|-------|--------------|
@@ -132,12 +132,12 @@ The target: AI agents that need to process documents, emails, or data.
 
 The entire project is open source on GitHub:
 
-**Repository:** [github.com/ronaldanton/x402-shop](https://github.com/ronaldanton/x402-shop)
+**Repository:** [github.com/ronaldanton/AgentPay](https://github.com/ronaldanton/AgentPay)
 
 **Quick Start:**
 ```bash
-git clone https://github.com/ronaldanton/x402-shop.git
-cd x402-shop
+git clone https://github.com/ronaldanton/AgentPay.git
+cd AgentPay
 npm install
 # Pull Ollama model
 ollama pull gemma4:31b-cloud
@@ -167,8 +167,8 @@ I'm building more services:
 
 *Built with love for the machine-to-machine economy. 💰*
 
-**Try it now:** [x402-shop](https://yard-singer-minus-drain.trycloudflare.com)
+**Try it now:** [AgentPay](https://yard-singer-minus-drain.trycloudflare.com)
 
 **Follow me on Twitter:** @YourHandle
 
-**Star the repo:** [github.com/ronaldanton/x402-shop](https://github.com/ronaldanton/x402-shop)
+**Star the repo:** [github.com/ronaldanton/AgentPay](https://github.com/ronaldanton/AgentPay)

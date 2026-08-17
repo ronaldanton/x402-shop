@@ -1,4 +1,4 @@
-# x402-shop — Complete Traffic & Discovery Channels
+# AgentPay — Complete Traffic & Discovery Channels
 
 ## 🎯 TIER 1: HIGHEST IMPACT (Do These First)
 
