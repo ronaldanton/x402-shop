@@ -82,21 +82,61 @@ app.use(
         accepts: [{ scheme: "exact", price: "$0.01", network: NETWORK, payTo: PAY_TO }],
         description: "AI text summarization — produces a 250-word summary of any text up to 20k characters",
         mimeType: "application/json",
+        serviceName: "x402-shop Summarize",
+        tags: ["summarize", "text", "AI", "x402"],
+        extensions: {
+          bazaar: {
+            info: {
+              input: { type: "http", method: "POST", body: { text: "string (200-20000 chars)" } },
+              output: { type: "json", example: { summary: "string" } }
+            }
+          }
+        }
       },
       "POST /v1/classify-insurance": {
         accepts: [{ scheme: "exact", price: "$0.02", network: NETWORK, payTo: PAY_TO }],
         description: "Insurance lead classifier — identifies intent, urgency, and line of business from customer messages",
         mimeType: "application/json",
+        serviceName: "x402-shop Insurance Classifier",
+        tags: ["insurance", "classify", "AI", "x402"],
+        extensions: {
+          bazaar: {
+            info: {
+              input: { type: "http", method: "POST", body: { text: "string (10-5000 chars)" } },
+              output: { type: "json", example: { intent: "string", urgency: "string", lineOfBusiness: "string", confidence: 0.95 } }
+            }
+          }
+        }
       },
       "POST /v1/extract": {
         accepts: [{ scheme: "exact", price: "$0.03", network: NETWORK, payTo: PAY_TO }],
         description: "Structured field extraction — pulls key-value pairs from emails, forms, and documents",
         mimeType: "application/json",
+        serviceName: "x402-shop Field Extractor",
+        tags: ["extract", "fields", "AI", "x402"],
+        extensions: {
+          bazaar: {
+            info: {
+              input: { type: "http", method: "POST", body: { text: "string (10-20000 chars)" } },
+              output: { type: "json", example: { fields: { name: "string", date: "string" } } }
+            }
+          }
+        }
       },
       "POST /v1/insurance-analysis": {
         accepts: [{ scheme: "exact", price: "$0.10", network: NETWORK, payTo: PAY_TO }],
         description: "Full insurance analysis bundle — classification + field extraction + summary in one call",
         mimeType: "application/json",
+        serviceName: "x402-shop Full Analysis",
+        tags: ["insurance", "analysis", "bundle", "AI", "x402"],
+        extensions: {
+          bazaar: {
+            info: {
+              input: { type: "http", method: "POST", body: { text: "string (10-20000 chars)" } },
+              output: { type: "json", example: { classification: {}, extraction: {}, summary: "string" } }
+            }
+          }
+        }
       },
     },
     new x402ResourceServer(facilitatorClient).register(NETWORK, new ExactEvmScheme()),

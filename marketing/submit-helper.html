@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>x402-shop Submission Helper</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #1a1a2e; color: #e0e0e0; }
+        h1 { color: #00d4ff; }
+        .card { background: #16213e; border-radius: 12px; padding: 20px; margin: 15px 0; border: 1px solid #0f3460; }
+        .card h2 { color: #00d4ff; margin-top: 0; }
+        .field { margin: 10px 0; }
+        .field label { display: block; margin-bottom: 5px; color: #a0a0a0; font-size: 14px; }
+        .field input, .field textarea, .field select { width: 100%; padding: 10px; border: 1px solid #0f3460; border-radius: 6px; background: #1a1a2e; color: #fff; font-size: 14px; box-sizing: border-box; }
+        .field textarea { min-height: 80px; resize: vertical; }
+        .btn { background: #00d4ff; color: #000; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin: 10px 5px; }
+        .btn:hover { background: #00b8d9; }
+        .btn-secondary { background: #533483; color: #fff; }
+        .btn-secondary:hover { background: #6a4c93; }
+        .status { margin-top: 10px; padding: 10px; border-radius: 6px; display: none; }
+        .status.success { background: #1b5e20; display: block; }
+        .status.error { background: #b71c1c; display: block; }
+        .copy-btn { background: #533483; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .copy-btn:hover { background: #6a4c93; }
+        pre { background: #0f3460; padding: 15px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <h1>🚀 x402-shop Submission Helper</h1>
+    <p>Click the buttons below to submit to each platform. Forms are pre-filled where possible.</p>
+
+    <!-- AgentLocker -->
+    <div class="card">
+        <h2>1. AgentLocker.ai (3,465 agents)</h2>
+        <p>Free submission. AI agent directory.</p>
+        <div class="field">
+            <label>Name</label>
+            <input type="text" id="al-name" value="x402-shop" readonly>
+        </div>
+        <div class="field">
+            <label>URL</label>
+            <input type="text" id="al-url" value="https://github.com/ronaldanton/x402-shop" readonly>
+        </div>
+        <div class="field">
+            <label>Description</label>
+            <textarea id="al-desc" readonly>AI services behind HTTP 402 paywall. No accounts, no API keys — just pay with USDC on Base. Summarize ($0.01), classify insurance ($0.02), extract fields ($0.03).</textarea>
+        </div>
+        <button class="btn" onclick="window.open('https://agentlocker.ai/submit-your-tool', '_blank')">Open AgentLocker →</button>
+        <button class="copy-btn" onclick="copyAll('al')">Copy All Fields</button>
+    </div>
+
+    <!-- theresanaiforthat -->
+    <div class="card">
+        <h2>2. theresanaiforthat.com (90M+ users)</h2>
+        <p>Free submission. The front page of AI.</p>
+        <div class="field">
+            <label>Name</label>
+            <input type="text" id="taaft-name" value="x402-shop" readonly>
+        </div>
+        <div class="field">
+            <label>URL</label>
+            <input type="text" id="taaft-url" value="https://yard-singer-minus-drain.trycloudflare.com" readonly>
+        </div>
+        <div class="field">
+            <label>Description</label>
+            <textarea id="taaft-desc" readonly>AI services behind HTTP 402 paywall. Pay with USDC, no accounts needed.</textarea>
+        </div>
+        <button class="btn" onclick="window.open('https://theresanaiforthat.com/submit/', '_blank')">Open TAAFT →</button>
+        <button class="copy-btn" onclick="copyAll('taaft')">Copy All Fields</button>
+    </div>
+
+    <!-- Product Hunt -->
+    <div class="card">
+        <h2>3. Product Hunt</h2>
+        <p>Launch day traffic. Need account.</p>
+        <div class="field">
+            <label>Name</label>
+            <input type="text" id="ph-name" value="x402-shop" readonly>
+        </div>
+        <div class="field">
+            <label>Tagline</label>
+            <input type="text" id="ph-tagline" value="AI services that accept crypto payments — no accounts needed" readonly>
+        </div>
+        <div class="field">
+            <label>Website</label>
+            <input type="text" id="ph-url" value="https://github.com/ronaldanton/x402-shop" readonly>
+        </div>
+        <button class="btn" onclick="window.open('https://www.producthunt.com/posts/new', '_blank')">Open Product Hunt →</button>
+        <button class="copy-btn" onclick="copyAll('ph')">Copy All Fields</button>
+    </div>
+
+    <!-- Hacker News -->
+    <div class="card">
+        <h2>4. Hacker News "Show HN"</h2>
+        <p>Developer community. Need account.</p>
+        <div class="field">
+            <label>Title</label>
+            <input type="text" id="hn-title" value="Show HN: x402-shop – AI services that accept USDC payments via HTTP 402" readonly>
+        </div>
+        <div class="field">
+            <label>URL</label>
+            <input type="text" id="hn-url" value="https://github.com/ronaldanton/x402-shop" readonly>
+        </div>
+        <button class="btn" onclick="window.open('https://news.ycombinator.com/submit', '_blank')">Open Hacker News →</button>
+        <button class="copy-btn" onclick="copyAll('hn')">Copy All Fields</button>
+    </div>
+
+    <!-- Dev.to -->
+    <div class="card">
+        <h2>5. Dev.to Article</h2>
+        <p>Technical article. Need account.</p>
+        <button class="btn" onclick="window.open('https://dev.to/new', '_blank')">Open Dev.to Editor →</button>
+        <button class="btn btn-secondary" onclick="showArticle()">Show Article Content</button>
+        <div id="article-content" class="hidden">
+            <pre id="article-text"></pre>
+            <button class="copy-btn" onclick="copyArticle()">Copy Article</button>
+        </div>
+    </div>
+
+    <!-- Reddit -->
+    <div class="card">
+        <h2>6. Reddit Posts</h2>
+        <p>Post on these subreddits (need account):</p>
+        <ul>
+            <li><a href="https://reddit.com/r/x402/submit" target="_blank" style="color: #00d4ff;">r/x402</a> — Active x402 community</li>
+            <li><a href="https://reddit.com/r/SideProject/submit" target="_blank" style="color: #00d4ff;">r/SideProject</a> — Show your project</li>
+            <li><a href="https://reddit.com/r/AutoGPT/submit" target="_blank" style="color: #00d4ff;">r/AutoGPT</a> — AI agents community</li>
+        </ul>
+        <button class="btn" onclick="showRedditPost()">Show Reddit Post</button>
+        <div id="reddit-content" class="hidden">
+            <pre id="reddit-text"></pre>
+            <button class="copy-btn" onclick="copyReddit()">Copy Post</button>
+        </div>
+    </div>
+
+    <!-- GitHub Discussion -->
+    <div class="card">
+        <h2>7. GitHub Discussion</h2>
+        <p>Post on x402 discussions.</p>
+        <button class="btn" onclick="window.open('https://github.com/coinbase/x402/discussions', '_blank')">Open x402 Discussions →</button>
+    </div>
+
+    <div class="card" style="background: #1b5e20;">
+        <h2 style="color: #4caf50;">✅ After Submission</h2>
+        <p>Once you've submitted, the Bazaar registration should trigger automatically after the first payment through the facilitator.</p>
+        <p>Check Bazaar status:</p>
+        <pre>curl -s "https://facilitator.payai.network/discovery/resources" | python3 -c "import sys,json; d=json.load(sys.stdin); print([r for r in d.get('resources',[]) if 'x402' in str(r)])"</pre>
+    </div>
+
+    <script>
+        const articleContent = `# I Built an AI Service That Accepts Crypto Payments — Here's How
+
+## The Problem: AI Agents Can't Pay for APIs
+
+I've been building AI agents for a while now. They're great at research, coding, and automation. But there's one fundamental problem: when an AI agent needs to call an API, it has to create an account, enter a credit card, pass CAPTCHA, and wait for verification. This is a human workflow. AI agents can't do this.
+
+## The Solution: HTTP 402 + x402 Protocol
+
+The x402 protocol (backed by Coinbase and Stripe) fixes this. It uses the HTTP 402 "Payment Required" status code to enable instant micropayments.
+
+## What I Built: x402-shop
+
+Three AI services behind an HTTP 402 paywall:
+- Summarize ($0.01) — 250-word summary of any text
+- Insurance Classifier ($0.02) — Intent, urgency, line of business
+- Field Extractor ($0.03) — Structured key-value extraction
+
+## Tech Stack
+- x402 V2 SDK (@x402/express 2.22.0)
+- Base Mainnet — fast, cheap L2
+- USDC — stablecoin payments
+- Ollama — local AI inference
+- Express 5 — Node.js server
+
+## Open Source
+GitHub: https://github.com/ronaldanton/x402-shop
+
+Try it now: https://yard-singer-minus-drain.trycloudflare.com`;
+
+        const redditPost = `Title: Built x402-shop — AI services behind HTTP 402 paywall (summarize, classify, extract)
+
+Hey r/x402 community! 👋
+
+I just built x402-shop — a live reference implementation of the x402 protocol for selling AI services.
+
+Three AI services behind an HTTP 402 paywall:
+- Summarize ($0.01) — 250-word summary
+- Insurance Classifier ($0.02) — Intent, urgency, line of business
+- Field Extractor ($0.03) — Structured key-value extraction
+- Full Analysis ($0.10) — All three combined
+
+How it works:
+1. Agent sends POST request
+2. Server returns 402 with payment requirements
+3. Agent signs USDC micropayment (EIP-3009, gasless!)
+4. Agent retries with payment attached
+5. Server returns 200 with AI response
+
+Tech: x402 V2 SDK, Base Mainnet, USDC, Ollama, Express 5
+
+Live now: https://yard-singer-minus-drain.trycloudflare.com
+GitHub: https://github.com/ronaldanton/x402-shop
+
+Would love feedback! What services would you pay for via x402?`;
+
+        function copyText(id) {
+            const el = document.getElementById(id);
+            navigator.clipboard.writeText(el.value);
+            alert('Copied!');
+        }
+
+        function copyAll(prefix) {
+            const name = document.getElementById(prefix + '-name').value;
+            const url = document.getElementById(prefix + '-url').value;
+            const desc = document.getElementById(prefix + '-desc')?.value || document.getElementById(prefix + '-tagline')?.value || document.getElementById(prefix + '-title')?.value;
+            navigator.clipboard.writeText(`Name: ${name}\\nURL: ${url}\\nDescription: ${desc}`);
+            alert('All fields copied!');
+        }
+
+        function showArticle() {
+            document.getElementById('article-content').classList.toggle('hidden');
+            document.getElementById('article-text').textContent = articleContent;
+        }
+
+        function copyArticle() {
+            navigator.clipboard.writeText(articleContent);
+            alert('Article copied!');
+        }
+
+        function showRedditPost() {
+            document.getElementById('reddit-content').classList.toggle('hidden');
+            document.getElementById('reddit-text').textContent = redditPost;
+        }
+
+        function copyReddit() {
+            navigator.clipboard.writeText(redditPost);
+            alert('Reddit post copied!');
+        }
+    </script>
+</body>
+</html>
