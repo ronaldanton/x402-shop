@@ -169,7 +169,11 @@ npm run buyer -- /v1/summarize ./payload.json
 |----------|-------|-------------|
 | `POST /v1/summarize` | **$0.01** | Summarize text (200–20,000 chars). Returns a ~250-word summary. |
 | `POST /v1/classify-insurance` | **$0.02** | Classify insurance leads: intent, urgency, line-of-business, confidence score. |
+| `POST /v1/sentiment` | **$0.02** | Sentiment analysis: positive/negative/neutral with emotions and keywords. |
 | `POST /v1/extract` | **$0.03** | Extract structured key-value fields from raw text (emails, forms, documents). |
+| `POST /v1/translate` | **$0.03** | Text translation to any language. |
+| `POST /v1/code-review` | **$0.05** | AI code review: bugs, security issues, performance, quality analysis. |
+| `POST /v1/insurance-analysis` | **$0.10** | ⭐ FULL BUNDLE — classification + extraction + summary in one call. |
 
 All services accept USDC on **Base mainnet** (chain ID `8453`) via the `exact` payment scheme. Testnet (Base Sepolia) is available via configuration.
 

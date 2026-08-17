@@ -58,6 +58,9 @@ app.get("/.well-known/x402", (req, res) => {
       { path: "/v1/classify-insurance", method: "POST", price: "$0.02", description: "Insurance lead classifier — intent, urgency, line of business" },
       { path: "/v1/extract", method: "POST", price: "$0.03", description: "Structured field extraction — key-value pairs from emails, forms, documents" },
       { path: "/v1/insurance-analysis", method: "POST", price: "$0.10", description: "Full insurance analysis bundle — classification + extraction + summary" },
+      { path: "/v1/code-review", method: "POST", price: "$0.05", description: "AI code review — bugs, security, performance, quality analysis" },
+      { path: "/v1/sentiment", method: "POST", price: "$0.02", description: "Sentiment analysis — positive/negative/neutral with emotions and keywords" },
+      { path: "/v1/translate", method: "POST", price: "$0.03", description: "Text translation — translate to any language" },
     ],
   });
 });
@@ -134,6 +137,51 @@ app.use(
             info: {
               input: { type: "http", method: "POST", body: { text: "string (10-20000 chars)" } },
               output: { type: "json", example: { classification: {}, extraction: {}, summary: "string" } }
+            }
+          }
+        }
+      },
+      "POST /v1/code-review": {
+        accepts: [{ scheme: "exact", price: "$0.05", network: NETWORK, payTo: PAY_TO }],
+        description: "AI code review — bugs, security, performance, quality analysis",
+        mimeType: "application/json",
+        serviceName: "x402-shop Code Review",
+        tags: ["code", "review", "AI", "x402", "security"],
+        extensions: {
+          bazaar: {
+            info: {
+              input: { type: "http", method: "POST", body: { code: "string (10-4000 chars)", language: "string (optional)" } },
+              output: { type: "json", example: { review: { issues: [], suggestions: [], score: 85 } } }
+            }
+          }
+        }
+      },
+      "POST /v1/sentiment": {
+        accepts: [{ scheme: "exact", price: "$0.02", network: NETWORK, payTo: PAY_TO }],
+        description: "Sentiment analysis — positive/negative/neutral with emotions and keywords",
+        mimeType: "application/json",
+        serviceName: "x402-shop Sentiment",
+        tags: ["sentiment", "analysis", "AI", "x402", "nlp"],
+        extensions: {
+          bazaar: {
+            info: {
+              input: { type: "http", method: "POST", body: { text: "string (10-5000 chars)" } },
+              output: { type: "json", example: { sentiment: "positive", confidence: 0.92, emotions: ["joy"], keywords: ["great"] } }
+            }
+          }
+        }
+      },
+      "POST /v1/translate": {
+        accepts: [{ scheme: "exact", price: "$0.03", network: NETWORK, payTo: PAY_TO }],
+        description: "Text translation — translate to any language",
+        mimeType: "application/json",
+        serviceName: "x402-shop Translate",
+        tags: ["translate", "language", "AI", "x402"],
+        extensions: {
+          bazaar: {
+            info: {
+              input: { type: "http", method: "POST", body: { text: "string (10-5000 chars)", targetLanguage: "string (default: Spanish)" } },
+              output: { type: "json", example: { translation: "string", targetLanguage: "Spanish" } }
             }
           }
         }
@@ -241,6 +289,61 @@ app.post("/v1/insurance-analysis", async (req, res) => {
   }
 });
 
+// ---------- NEW: Code Review ($0.05) ----------
+app.post("/v1/code-review", async (req, res) => {
+  const { code, language } = req.body || {};
+  if (!code || typeof code !== "string") return res.status(400).json({ error: "field 'code' required" });
+  if (code.length < 10) return res.status(400).json({ error: "code too short (min 10 chars)" });
+  try {
+    const out = await ollamaChat(process.env.MODEL_CODE || "gemma4:31b-cloud", [
+      { role: "system", content: `You are an expert code reviewer. Review this ${language || 'code'} for bugs, security issues, performance problems, and code quality. Be concise and specific. Format as JSON: {"issues": [...], "suggestions": [...], "score": 0-100}` },
+      { role: "user", content: code.slice(0, 4000) },
+    ]);
+    let parsed; try { parsed = JSON.parse(out.trim().replace(/^```(json)?|```$/g, "")); } catch { parsed = { raw: out }; }
+    record({ ts: new Date().toISOString(), service: "code-review", status: "paid", usd: 0.05, payer: payerOf(req) });
+    res.json({ review: parsed, language: language || "auto-detected" });
+  } catch (e) {
+    record({ ts: new Date().toISOString(), service: "code-review", status: "error", usd: 0, error: String(e).slice(0, 200) });
+    res.status(502).json({ error: "upstream AI failed" });
+  }
+});
+
+// ---------- NEW: Sentiment Analysis ($0.02) ----------
+app.post("/v1/sentiment", async (req, res) => {
+  const { text } = req.body || {};
+  if (!text || typeof text !== "string") return res.status(400).json({ error: "field 'text' required" });
+  try {
+    const out = await ollamaChat(process.env.MODEL_SENTIMENT || "gemma3:1b", [
+      { role: "system", content: 'Analyze sentiment. Respond ONLY with JSON: {"sentiment":"positive|negative|neutral","confidence":0.0,"emotions":["anger","joy","sadness","fear","surprise"],"keywords":["..."]}' },
+      { role: "user", content: text.slice(0, 5000) },
+    ]);
+    let parsed; try { parsed = JSON.parse(out.trim().replace(/^```(json)?|```$/g, "")); } catch { parsed = { raw: out }; }
+    record({ ts: new Date().toISOString(), service: "sentiment", status: "paid", usd: 0.02, payer: payerOf(req) });
+    res.json(parsed);
+  } catch (e) {
+    record({ ts: new Date().toISOString(), service: "sentiment", status: "error", usd: 0, error: String(e).slice(0, 200) });
+    res.status(502).json({ error: "upstream AI failed" });
+  }
+});
+
+// ---------- NEW: Translation ($0.03) ----------
+app.post("/v1/translate", async (req, res) => {
+  const { text, targetLanguage } = req.body || {};
+  if (!text || typeof text !== "string") return res.status(400).json({ error: "field 'text' required" });
+  const target = targetLanguage || "Spanish";
+  try {
+    const out = await ollamaChat(process.env.MODEL_TRANSLATE || "gemma4:31b-cloud", [
+      { role: "system", content: `Translate the following text to ${target}. Output ONLY the translation, no explanations.` },
+      { role: "user", content: text.slice(0, 5000) },
+    ]);
+    record({ ts: new Date().toISOString(), service: "translate", status: "paid", usd: 0.03, payer: payerOf(req) });
+    res.json({ translation: out.trim(), targetLanguage: target });
+  } catch (e) {
+    record({ ts: new Date().toISOString(), service: "translate", status: "error", usd: 0, error: String(e).slice(0, 200) });
+    res.status(502).json({ error: "upstream AI failed" });
+  }
+});
+
 function payerOf(req) {
   // best-effort payer identification from middleware-verified payment
   const p = req.x402Payment || req.payment || null;
@@ -268,13 +371,16 @@ No accounts. No API keys. Pay per call in USDC.</p>
 <div>
 <div class="stat"><b>${"$" + (ledger.filter(e=>e.status==="paid").reduce((s,e)=>s+(e.usd||0),0)).toFixed(2)}</b>gross revenue</div>
 <div class="stat"><b>${ledger.filter(e=>e.status==="paid").length}</b>paid requests</div>
-<div class="stat"><b>4</b>services live</div>
+<div class="stat"><b>7</b>services live</div>
 </div>
 <h2>Services &amp; pricing</h2>
 <table><tr><th>Endpoint</th><th>Price</th><th>Description</th></tr>
 <tr><td><code>POST /v1/summarize</code></td><td>$0.01</td><td>Summarize text (up to 20k chars)</td></tr>
 <tr><td><code>POST /v1/classify-insurance</code></td><td>$0.02</td><td>Insurance lead classification (intent/urgency/line)</td></tr>
+<tr><td><code>POST /v1/sentiment</code></td><td>$0.02</td><td>Sentiment analysis (positive/negative/neutral + emotions)</td></tr>
 <tr><td><code>POST /v1/extract</code></td><td>$0.03</td><td>Structured field extraction</td></tr>
+<tr><td><code>POST /v1/translate</code></td><td>$0.03</td><td>Text translation to any language</td></tr>
+<tr><td><code>POST /v1/code-review</code></td><td>$0.05</td><td>AI code review (bugs/security/performance)</td></tr>
 <tr style="background:#141925"><td><code>POST /v1/insurance-analysis</code></td><td><b>$0.10</b></td><td><b>⭐ FULL BUNDLE</b> — classification + extraction + summary</td></tr>
 </table>
 <h2>Pay like a machine</h2>
