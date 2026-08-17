@@ -1,0 +1,22 @@
+{
+  "name": "x402-shop",
+  "version": "1.0.0",
+  "description": "MPP/x402 paywalled AI microservices - seller platform",
+  "type": "module",
+  "snippets": {},
+  "main": "src/server.js",
+  "docs": "README.md",
+  "scripts": {
+    "start": "node src/server.js",
+    "test:402": "node scripts/test-402.js",
+    "buyer": "node scripts/buy.js"
+  },
+  "dependencies": {
+    "@x402/evm": "^2.22.0",
+    "@x402/express": "^2.22.0",
+    "@x402/extensions": "^2.22.0",
+    "@x402/fetch": "^2.22.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
+}

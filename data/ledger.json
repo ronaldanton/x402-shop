@@ -1,0 +1,30 @@
+[
+  {
+    "ts": "2026-08-17T15:44:19.388Z",
+    "service": "summarize",
+    "status": "error",
+    "usd": 0,
+    "error": "ReferenceError: res is not defined"
+  },
+  {
+    "ts": "2026-08-17T15:45:44.141Z",
+    "service": "summarize",
+    "status": "paid",
+    "usd": 0.01,
+    "payer": "unknown"
+  },
+  {
+    "ts": "2026-08-17T15:46:17.389Z",
+    "service": "classify-insurance",
+    "status": "paid",
+    "usd": 0.02,
+    "payer": "unknown"
+  },
+  {
+    "ts": "2026-08-17T16:20:51.688Z",
+    "service": "classify-insurance",
+    "status": "paid",
+    "usd": 0.02,
+    "payer": "unknown"
+  }
+]
