@@ -167,7 +167,7 @@ I'm building more services:
 
 *Built with love for the machine-to-machine economy. 💰*
 
-**Try it now:** [AgentPay](https://yard-singer-minus-drain.trycloudflare.com)
+**Try it now:** [AgentPay](https://agentpay.help)
 
 **Follow me on Twitter:** @YourHandle
 

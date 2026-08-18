@@ -84,7 +84,7 @@ The entire stack is open-source. Fork it. Build your own. 🫶
 
 Ready to try it?
 
-🔗 https://yard-singer-minus-drain.trycloudflare.com
+🔗 https://agentpay.help
 
 Point your agent at the endpoint. Fund it with a few USDC on Base. Hit the API.
 

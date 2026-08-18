@@ -38,7 +38,7 @@ Three AI services behind an HTTP 402 paywall:
 
 ## Live now
 
-🔗 https://yard-singer-minus-drain.trycloudflare.com
+🔗 https://agentpay.help
 
 ## Open source
 

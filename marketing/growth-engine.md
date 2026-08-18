@@ -34,7 +34,7 @@
 
 **Fill in:**
 - Name: AgentPay
-- URL: https://yard-singer-minus-drain.trycloudflare.com
+- URL: https://agentpay.help
 - Description: AI services behind HTTP 402 paywall. Pay with USDC, no accounts needed.
 - Category: AI Agents / Developer Tools
 

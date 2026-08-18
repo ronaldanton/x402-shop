@@ -69,7 +69,7 @@ npm start
 
 ```bash
 # Unpaid request → HTTP 402 (paywall)
-curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:4021/v1/summarize \
+curl -s -o /dev/null -w "%{http_code}" -X POST https://agentpay.help/v1/summarize \
   -H 'Content-Type: application/json' \
   -d '{"text":"Machine Payments Protocol lets AI agents pay for API calls using the HTTP 402 status code."}'
 # → 402
@@ -228,7 +228,7 @@ RUN npm ci --omit=dev
 COPY src/ ./src/
 COPY data/ ./data/
 EXPOSE 4021
-HEALTHCHECK CMD curl -f http://localhost:4021/health || exit 1
+HEALTHCHECK CMD curl -f https://agentpay.help/health || exit 1
 CMD ["node", "src/server.js"]
 ```
 
@@ -401,7 +401,7 @@ const client = x402Client.fromConfig({
 const payFetch = wrapFetchWithPayment(globalThis.fetch, client);
 
 // This automatically handles the 402 → payment → retry flow
-const res = await payFetch("http://localhost:4021/v1/summarize", {
+const res = await payFetch("https://agentpay.help/v1/summarize", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ text: "Your text here..." }),

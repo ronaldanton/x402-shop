@@ -61,8 +61,8 @@ If you're using Cloudflare Tunnel instead of direct DNS:
 1. Go to Network → Tunnels
 2. Edit your tunnel
 3. Add public hostnames:
-   - `agentpay.help` → `http://localhost:4021`
-   - `www.agentpay.help` → `http://localhost:4021`
+   - `agentpay.help` → `https://agentpay.help`
+   - `www.agentpay.help` → `https://agentpay.help`
 
 ## Verification
 
