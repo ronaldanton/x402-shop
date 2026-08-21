@@ -1,0 +1,25 @@
+🚀 I just launched AgentPay — AI microservices that agents (and humans) can pay for via HTTP 402!
+
+🧵 What is it?
+
+7 AI services behind the x402 / Machine Payments Protocol:
+• Summarize ($0.01)
+• Insurance classifier ($0.02)
+• Sentiment analysis ($0.02)
+• Field extraction ($0.03)
+• Translation ($0.03)
+• Code review ($0.05)
+• Full analysis bundle ($0.10)
+
+🔑 No accounts. No API keys. No signup.
+Just send USDC on Base and get your result.
+
+⚡ How it works:
+1. Send a POST request → get HTTP 402 with payment instructions
+2. Your wallet pays automatically
+3. Get the AI result
+
+Open source reference implementation:
+https://github.com/ronaldanton/x402-shop
+
+Try it: https://agentpay.help

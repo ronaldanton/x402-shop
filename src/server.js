@@ -43,6 +43,7 @@ const app = express();
 app.use(express.json({ limit: "2mb" }));
 
 // Free routes first (no paywall): landing, discovery, dashboard
+app.use("/branding", express.static(path.join(process.cwd(), "branding")));
 app.get("/", (req, res) => {
   res.type("html").send(indexPage());
 });
@@ -351,55 +352,76 @@ function payerOf(req) {
 }
 
 // ---------- Landing page ----------
-function indexPage() {
-  return `<!doctype html><html><head><meta charset="utf-8"><title>AgentPay</title>
-<style>
-:root{color-scheme:dark}
-body{font-family:ui-monospace,Menlo,monospace;background:#0b0e14;color:#d5d9e0;margin:0;padding:2rem;max-width:60rem;margin-inline:auto}
-h1{color:#6ee7a0}h2{color:#9dc3ff;margin-top:2rem}
+const INDEX_CSS = `:root{color-scheme:dark}
+body{font-family:ui-monospace,Menlo,monospace;background:#0b0e14;color:#d5d9e0;margin:0;padding:2rem;max-width:65rem;margin-inline:auto}
+.header-row{display:flex;align-items:center;gap:1.25rem;margin-bottom:1rem}
+.logo-img{width:64px;height:64px;border-radius:12px}
+h1{color:#6ee7a0;font-size:2rem;margin:0}h2{color:#9dc3ff;margin-top:2rem}
+h2 i{color:#6ee7a0;font-style:normal}
 table{border-collapse:collapse;width:100%;margin-top:1rem}
 td,th{border:1px solid #2a2f3a;padding:.5rem .75rem;text-align:left;font-size:.9rem}
 th{background:#141925;color:#9dc3ff}
 code{background:#141925;padding:.15rem .4rem;border-radius:4px}
-a{color:#6ee7a0}
-.stat{display:inline-block;background:#141925;border:1px solid #2a2f3a;padding:.75rem 1.25rem;border-radius:8px;margin:.25rem;min-width:9rem}
+a{color:#6ee7a0}.stat{display:inline-block;background:#141925;border:1px solid #2a2f3a;padding:.75rem 1.25rem;border-radius:8px;margin:.25rem;min-width:9rem}
 .stat b{display:block;font-size:1.4rem;color:#6ee7a0}
-</style></head><body>
-<h1>AgentPay</h1>
-<p>AgentPay — AI services that agents pay for via the <b>402 Payment Required</b> protocol (x402 / MPP).
-No accounts. No API keys. Pay per call in USDC.</p>
-<div>
-<div class="stat"><b>${"$" + (ledger.filter(e=>e.status==="paid").reduce((s,e)=>s+(e.usd||0),0)).toFixed(2)}</b>gross revenue</div>
-<div class="stat"><b>${ledger.filter(e=>e.status==="paid").length}</b>paid requests</div>
-<div class="stat"><b>7</b>services live</div>
-</div>
-<h2>Services &amp; pricing</h2>
-<table><tr><th>Endpoint</th><th>Price</th><th>Description</th></tr>
-<tr><td><code>POST /v1/summarize</code></td><td>$0.01</td><td>Summarize text (up to 20k chars)</td></tr>
-<tr><td><code>POST /v1/classify-insurance</code></td><td>$0.02</td><td>Insurance lead classification (intent/urgency/line)</td></tr>
-<tr><td><code>POST /v1/sentiment</code></td><td>$0.02</td><td>Sentiment analysis (positive/negative/neutral + emotions)</td></tr>
-<tr><td><code>POST /v1/extract</code></td><td>$0.03</td><td>Structured field extraction</td></tr>
-<tr><td><code>POST /v1/translate</code></td><td>$0.03</td><td>Text translation to any language</td></tr>
-<tr><td><code>POST /v1/code-review</code></td><td>$0.05</td><td>AI code review (bugs/security/performance)</td></tr>
-<tr style="background:#141925"><td><code>POST /v1/insurance-analysis</code></td><td><b>$0.10</b></td><td><b>⭐ FULL BUNDLE</b> — classification + extraction + summary</td></tr>
-</table>
-<h2>Pay like a machine</h2>
-<pre><code># 1. Get the price (no payment attached)
-curl -i -X POST https://YOUR-HOST/v1/summarize \\
-  -H 'Content-Type: application/json' -d '{"text":"..."}'
-# → HTTP 402 with payment instructions (accepts[])
+.tagline{color:#9dc3ff;font-size:1.05rem;margin-bottom:1.5rem}
+.cta{display:inline-block;background:#6ee7a0;color:#0b0e14;padding:.6rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:bold;margin-top:.5rem}
+.cta:hover{background:#5bd48a}
+.endpoints{display:grid;grid-template-columns:repeat(auto-fill,minmax(18rem,1fr));gap:.75rem;margin-top:1rem}
+.card{background:#141925;border:1px solid #2a2f3a;border-radius:8px;padding:1rem}
+.card .price{color:#6ee7a0;font-weight:bold;font-size:1.1rem}
+.card .path{color:#9dc3ff;font-family:monospace;font-size:.85rem}
+.card .desc{color:#a0a8b4;font-size:.85rem;margin-top:.35rem}
+.tag{display:inline-block;background:#1a2040;color:#6ee7a0;padding:.1rem .5rem;border-radius:4px;font-size:.75rem;margin-right:.25rem}
+.powered{text-align:center;color:#5a6270;font-size:.8rem;margin-top:3rem;border-top:1px solid #2a2f3a;padding-top:1.5rem}
+.powered a{color:#6ee7a0}
+pre{overflow-x:auto}
+@media(max-width:600px){.endpoints{grid-template-columns:1fr}}`;
 
-# 2. Attach payment and retry (x402 client does this automatically)
+const SERVICES_HTML = [
+  { path: "POST /v1/summarize", price: "$0.01", desc: "Summarize text (up to 20k chars)", tag: "text" },
+  { path: "POST /v1/classify-insurance", price: "$0.02", desc: "Insurance lead classification (intent/urgency/line)", tag: "insurance" },
+  { path: "POST /v1/sentiment", price: "$0.02", desc: "Sentiment analysis — positive/negative/neutral + emotions", tag: "nlp" },
+  { path: "POST /v1/extract", price: "$0.03", desc: "Structured field extraction from emails, forms, docs", tag: "data" },
+  { path: "POST /v1/translate", price: "$0.03", desc: "Text translation to any language", tag: "language" },
+  { path: "POST /v1/code-review", price: "$0.05", desc: "AI code review — bugs, security, performance", tag: "dev" },
+  { path: "POST /v1/insurance-analysis", price: "$0.10", desc: "⭐ FULL BUNDLE — classification + extraction + summary", tag: "bundle" },
+].map(s => `<div class="card"><span class="price">${s.price}</span> <span class="path">${s.path}</span><div class="desc">${s.desc}</div><span class="tag">${s.tag}</span></div>`).join("");
+
+function indexPage() {
+  const gross = (ledger.filter(e=>e.status==="paid").reduce((s,e)=>s+(e.usd||0),0)).toFixed(2);
+  const paid = ledger.filter(e=>e.status==="paid").length;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AgentPay — AI microservices via x402</title>
+<meta name="description" content="Pay-per-call AI services via the 402 Payment Required protocol. No accounts, no API keys — just USDC on Base.">
+<meta property="og:title" content="AgentPay — AI microservices via x402"><meta property="og:description" content="Pay-per-call AI services. No accounts. No API keys. USDC on Base.">
+<meta property="og:image" content="/branding/final/og-image.png"><meta property="og:url" content="https://agentpay.help">
+<link rel="icon" type="image/x-icon" href="/branding/final/favicon.ico">
+<link rel="apple-touch-icon" href="/branding/final/apple-touch-icon.png">
+<style>${INDEX_CSS}</style></head><body>
+<div class="header-row"><img src="/branding/final/logo-64.png" alt="AgentPay" class="logo-img"><h1>AgentPay</h1></div>
+<p class="tagline">AI microservices behind the <b>402 Payment Required</b> protocol (x402 / MPP).<br>No accounts. No API keys. Pay per call in <b>USDC on Base</b>.</p>
+<div><div class="stat"><b>$${gross}</b>gross revenue</div><div class="stat"><b>${paid}</b>paid requests</div><div class="stat"><b>7</b>services live</div><a href="/stats" class="cta">📊 Dashboard</a></div>
+<h2><i>✦</i> Services &amp; Pricing</h2>
+<div class="endpoints">${SERVICES_HTML}</div>
+<h2><i>✦</i> Pay Like a Machine</h2>
+<pre><code># 1. Get the price — send without payment
+curl -i -X POST https://agentpay.help/v1/summarize \
+  -H 'Content-Type: application/json' -d '{"text":"Your text here..."}'
+# → HTTP 402 with payment instructions
+
+# 2. Pay &amp; get result (x402 client handles it)
 npm i @x402/fetch viem
-x402 fetch pays & returns your result. See README.</code></pre>
-<h2>For AI agents</h2>
-<p>Machine-readable catalog: <code>/.well-known/x402</code> · Stats: <code>/stats</code> · Health: <code>/health</code></p>
-</body></html>`;
+x402 fetch pays &amp; returns your result. See README.</code></pre>
+<h2><i>✦</i> For AI Agents</h2>
+<p>Machine-readable catalog: <code><a href="/.well-known/x402">/.well-known/x402</a></code> · Health: <code><a href="/health">/health</a></code></p>
+<p class="powered">Powered by <a href="https://github.com/ronaldanton/x402-shop">x402-shop</a> · <a href="https://x402.org">x402 protocol</a> · Built on Base</p></body></html>`;
+
 }
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`AgentPay listening on :${PORT}`);
   console.log(`  payTo:   ${PAY_TO}`);
-  console.log(`  network: ${NETWORK} (Base Sepolia testnet)`);
+  console.log(`  network: ${NETWORK} (${NETWORK === 'eip155:8453' ? 'Base mainnet' : 'Base Sepolia testnet'})`);
   console.log(`  facilitator: ${FACILITATOR}`);
 });

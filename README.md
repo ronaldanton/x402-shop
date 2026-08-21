@@ -1,8 +1,8 @@
-# AgentPay
+# AgentPay — [agentpay.help](https://agentpay.help)
 
 > **Machine-payable AI microservices via the [402 Payment Required](https://x402.org) protocol (x402 / MPP)**
-
-No accounts. No API keys. No OAuth. Pay per call in USDC on Base.
+>
+> No accounts. No API keys. No OAuth. Pay per call in **USDC on Base**.
 
 AgentPay is an open-source reference implementation of the [Machine Payments Protocol](https://x402.org) — wrapping local AI models behind an HTTP 402 paywall so that AI agents (and humans) can pay for compute on a per-request basis using stablecoins.
 
