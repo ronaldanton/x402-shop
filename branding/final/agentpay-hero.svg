@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+  <defs>
+    <!-- Primary cyan-blue gradient -->
+    <linearGradient id="cyber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F2FE"/>
+      <stop offset="50%" stop-color="#00A3FF"/>
+      <stop offset="100%" stop-color="#0052FF"/>
+    </linearGradient>
+    <!-- Lighter gradient for secondary elements -->
+    <linearGradient id="cyber-light" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F2FE"/>
+      <stop offset="100%" stop-color="#00A3FF"/>
+    </linearGradient>
+    <!-- Coin gradient -->
+    <radialGradient id="coin-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </radialGradient>
+    <!-- Badge gradient border -->
+    <linearGradient id="badge-border" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F2FE"/>
+      <stop offset="100%" stop-color="#0052FF"/>
+    </linearGradient>
+    <!-- Fade out gradient for speed lines -->
+    <linearGradient id="fade-left" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F2FE" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#00F2FE" stop-opacity="0.8"/>
+    </linearGradient>
+    <!-- Wave signal fade -->
+    <linearGradient id="wave-fade" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00A3FF" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#0052FF" stop-opacity="0.2"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="800" fill="#030712" rx="40"/>
+
+  <!-- ============ TOP SECTION: Hero Visual ============ -->
+
+  <!-- Left speed lines (motion trails) -->
+  <g transform="translate(60, 240)">
+    <rect x="0" y="0" width="140" height="8" rx="4" fill="url(#fade-left)"/>
+    <rect x="30" y="28" width="180" height="8" rx="4" fill="url(#fade-left)"/>
+    <rect x="60" y="56" width="100" height="8" rx="4" fill="url(#fade-left)"/>
+  </g>
+
+  <!-- Hexagon with AI chip -->
+  <g transform="translate(270, 160)">
+    <!-- Outer hexagon -->
+    <polygon points="120,0 240,69 240,207 120,276 0,207 0,69" fill="none" stroke="url(#cyber)" stroke-width="6" stroke-linejoin="round"/>
+    <!-- Inner hexagon (decorative ring) -->
+    <polygon points="120,12 228,75 228,201 120,264 12,201 12,75" fill="none" stroke="#1E293B" stroke-width="1.5"/>
+    
+    <!-- Central AI chip -->
+    <rect x="72" y="72" width="96" height="96" rx="12" fill="#0A1628" stroke="#00A3FF" stroke-width="2"/>
+    <!-- Chip text -->
+    <text x="120" y="130" font-family="'Inter', 'Segoe UI', Arial, sans-serif" font-size="36" font-weight="800" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">AI</text>
+    
+    <!-- Circuit traces radiating from chip with nodes -->
+    <!-- Top -->
+    <line x1="120" y1="72" x2="120" y2="20" stroke="#00A3FF" stroke-width="2"/>
+    <circle cx="120" cy="12" r="6" fill="#0A1628" stroke="#00A3FF" stroke-width="2"/>
+    <!-- Top-right -->
+    <line x1="180" y1="90" x2="216" y2="54" stroke="#00A3FF" stroke-width="2"/>
+    <circle cx="224" cy="46" r="6" fill="#0A1628" stroke="#00A3FF" stroke-width="2"/>
+    <!-- Bottom-right -->
+    <line x1="180" y1="186" x2="216" y2="222" stroke="#00A3FF" stroke-width="2"/>
+    <circle cx="224" cy="230" r="6" fill="#0A1628" stroke="#00A3FF" stroke-width="2"/>
+    <!-- Bottom -->
+    <line x1="120" y1="204" x2="120" y2="256" stroke="#00A3FF" stroke-width="2"/>
+    <circle cx="120" cy="264" r="6" fill="#0A1628" stroke="#00A3FF" stroke-width="2"/>
+    <!-- Bottom-left -->
+    <line x1="60" y1="186" x2="24" y2="222" stroke="#00A3FF" stroke-width="2"/>
+    <circle cx="16" cy="230" r="6" fill="#0A1628" stroke="#00A3FF" stroke-width="2"/>
+    <!-- Top-left -->
+    <line x1="60" y1="90" x2="24" y2="54" stroke="#00A3FF" stroke-width="2"/>
+    <circle cx="16" cy="46" r="6" fill="#0A1628" stroke="#00A3FF" stroke-width="2"/>
+  </g>
+
+  <!-- 402 PAYMENT REQUIRED badge (overlaps hexagon bottom) -->
+  <g transform="translate(310, 370)">
+    <rect x="0" y="0" width="220" height="48" rx="24" fill="#030712" stroke="url(#badge-border)" stroke-width="3"/>
+    <text x="42" y="26" font-family="'Inter', 'Segoe UI', Arial, sans-serif" font-size="20" font-weight="800" fill="url(#cyber-light)" text-anchor="middle" dominant-baseline="middle">402</text>
+    <text x="160" y="26" font-family="'JetBrains Mono', 'Courier New', monospace" font-size="10" font-weight="600" fill="#94A3B8" text-anchor="middle" dominant-baseline="middle" letter-spacing="2">PAYMENT REQUIRED</text>
+  </g>
+
+  <!-- Signal waves (right side) -->
+  <g transform="translate(540, 235)">
+    <!-- Wave arcs -->
+    <path d="M0 0 Q20 -20 50 0" fill="none" stroke="url(#wave-fade)" stroke-width="3" stroke-linecap="round"/>
+    <path d="M0 20 Q35 -5 70 20" fill="none" stroke="url(#wave-fade)" stroke-width="3" stroke-linecap="round"/>
+    <path d="M0 40 Q50 15 90 40" fill="none" stroke="url(#wave-fade)" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- USDC Coin -->
+  <g transform="translate(610, 210)">
+    <circle cx="40" cy="40" r="38" fill="url(#coin-grad)"/>
+    <circle cx="40" cy="40" r="34" fill="none" stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="1.5"/>
+    <circle cx="40" cy="40" r="24" fill="none" stroke="#FFFFFF" stroke-width="2"/>
+    <text x="40" y="48" font-family="'Inter', 'Segoe UI', Arial, sans-serif" font-size="28" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">$</text>
+  </g>
+
+  <!-- ============ MIDDLE SECTION: Brand Typography ============ -->
+  
+  <!-- AgentPay.help -->
+  <g transform="translate(0, 490)">
+    <text x="400" y="0" font-family="'Inter', 'Segoe UI', Arial, sans-serif" font-size="56" font-weight="800" text-anchor="middle" dominant-baseline="middle">
+      <tspan fill="#FFFFFF">Agent</tspan><tspan fill="url(#cyber-light)">Pay</tspan><tspan fill="#FFFFFF">.</tspan><tspan fill="#64748B">help</tspan>
+    </text>
+  </g>
+
+  <!-- Tagline -->
+  <g transform="translate(0, 540)">
+    <text x="400" y="0" font-family="'JetBrains Mono', 'Courier New', monospace" font-size="14" font-weight="600" fill="#94A3B8" text-anchor="middle" dominant-baseline="middle" letter-spacing="4">AI MICROSERVICES</text>
+    <circle cx="400" cy="6" r="4" fill="#00F2FE"/>
+    <text x="530" y="0" font-family="'JetBrains Mono', 'Courier New', monospace" font-size="14" font-weight="600" fill="#94A3B8" text-anchor="middle" dominant-baseline="middle" letter-spacing="3">402 PAYMENT REQUIRED</text>
+  </g>
+
+  <!-- Divider -->
+  <line x1="80" y1="590" x2="720" y2="590" stroke="#1E293B" stroke-width="1.5"/>
+
+  <!-- ============ BOTTOM SECTION: Value Propositions ============ -->
+  
+  <g transform="translate(0, 610)">
+    <!-- Column 1: No Accounts -->
+    <g transform="translate(100, 0)">
+      <!-- No accounts icon -->
+      <circle cx="0" cy="0" r="20" fill="none" stroke="#00A3FF" stroke-width="2"/>
+      <circle cx="0" cy="-2" r="7" fill="none" stroke="#00A3FF" stroke-width="1.5"/>
+      <path d="M-10 10 Q0 2 10 10" fill="none" stroke="#00A3FF" stroke-width="1.5"/>
+      <!-- Slash -->
+      <line x1="-14" y1="-14" x2="14" y2="14" stroke="#00A3FF" stroke-width="2" stroke-linecap="round"/>
+      <text x="28" y="-4" font-family="'Inter', Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">NO</text>
+      <text x="28" y="10" font-family="'Inter', Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">ACCOUNTS</text>
+    </g>
+
+    <!-- Column 2: No API Keys -->
+    <g transform="translate(300, 0)">
+      <!-- Key icon -->
+      <circle cx="0" cy="0" r="20" fill="none" stroke="#00A3FF" stroke-width="2"/>
+      <circle cx="-3" cy="0" r="4" fill="#00A3FF"/>
+      <line x1="2" y1="-2" x2="16" y2="-2" stroke="#00A3FF" stroke-width="2" stroke-linecap="round"/>
+      <line x1="12" y1="-2" x2="12" y2="6" stroke="#00A3FF" stroke-width="2" stroke-linecap="round"/>
+      <line x1="8" y1="-2" x2="8" y2="2" stroke="#00A3FF" stroke-width="2" stroke-linecap="round"/>
+      <!-- Slash -->
+      <line x1="-14" y1="-14" x2="14" y2="14" stroke="#00A3FF" stroke-width="2" stroke-linecap="round"/>
+      <text x="28" y="-4" font-family="'Inter', Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">NO</text>
+      <text x="28" y="10" font-family="'Inter', Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">API KEYS</text>
+    </g>
+
+    <!-- Column 3: Pay-per-call -->
+    <g transform="translate(500, 0)">
+      <rect x="-20" y="-20" width="40" height="40" rx="8" fill="none" stroke="#00A3FF" stroke-width="2"/>
+      <text x="0" y="4" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="700" fill="#00A3FF" text-anchor="middle" dominant-baseline="middle">&gt;_</text>
+      <text x="28" y="-4" font-family="'Inter', Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">PAY-PER-CALL</text>
+    </g>
+
+    <!-- Column 4: USDC on Base -->
+    <g transform="translate(700, 0)">
+      <circle cx="0" cy="0" r="20" fill="none" stroke="#00A3FF" stroke-width="2"/>
+      <circle cx="0" cy="0" r="12" fill="none" stroke="#00A3FF" stroke-width="1.5"/>
+      <text x="0" y="4" font-family="'Inter', Arial, sans-serif" font-size="14" font-weight="700" fill="#00A3FF" text-anchor="middle" dominant-baseline="middle">$</text>
+      <text x="28" y="-4" font-family="'Inter', Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">USDC</text>
+      <text x="28" y="10" font-family="'Inter', Arial, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">ON BASE</text>
+    </g>
+  </g>
+</svg>

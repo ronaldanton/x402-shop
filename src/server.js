@@ -406,7 +406,7 @@ function indexPage() {
 <link rel="icon" type="image/x-icon" href="/branding/final/favicon.ico">
 <link rel="apple-touch-icon" href="/branding/final/apple-touch-icon.png">
 <style>${INDEX_CSS}</style></head><body>
-<div class="header-row"><img src="/branding/final/wordmark-800.png" alt="AgentPay" class="logo-img" style="width:auto;height:48px"></div>
+<div class="header-row"><img src="/branding/final/logo-clean-64.png" alt="AgentPay" class="logo-img"></div>
 <p class="tagline">AI microservices behind the <b>402 Payment Required</b> protocol (x402 / MPP).<br>No accounts. No API keys. Pay per call in <b>USDC on Base</b>.</p>
 <div><div class="stat"><b>$${gross}</b>gross revenue</div><div class="stat"><b>${paid}</b>paid requests</div><div class="stat"><b>7</b>services live</div><a href="/stats" class="cta">📊 Dashboard</a></div>
 <h2><i>✦</i> Services &amp; Pricing</h2>
