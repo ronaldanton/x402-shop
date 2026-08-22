@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" width="800" height="200">
+  <defs>
+    <linearGradient id="ag" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6ee7a0"/>
+      <stop offset="100%" stop-color="#4fd1c5"/>
+    </linearGradient>
+    <linearGradient id="bg" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#9dc3ff"/>
+      <stop offset="100%" stop-color="#6ee7a0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="200" fill="#0b0e14" rx="16"/>
+  
+  <!-- Logo mark -->
+  <g transform="translate(30, 10)">
+    <circle cx="90" cy="90" r="88" fill="none" stroke="url(#ag)" stroke-width="2"/>
+    <circle cx="90" cy="90" r="78" fill="none" stroke="#141925" stroke-width="1"/>
+    <!-- "A" mark -->
+    <polygon points="90,18 42,150 62,150 75,115 105,115 118,150 138,150 90,18" fill="url(#ag)"/>
+    <!-- Arrow crossbar -->
+    <polygon points="58,97 122,97 122,82 145,105 122,128 122,113 58,113 58,97" fill="url(#bg)"/>
+    <!-- Circuit node -->
+    <circle cx="130" cy="105" r="5" fill="#0b0e14" stroke="#9dc3ff" stroke-width="1.5"/>
+    <circle cx="130" cy="105" r="2" fill="#9dc3ff"/>
+  </g>
+  
+  <!-- Wordmark -->
+  <text x="175" y="105" font-family="'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="64" font-weight="700" fill="#6ee7a0" letter-spacing="-1">Agent</text>
+  <text x="380" y="105" font-family="'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="64" font-weight="300" fill="#9dc3ff" letter-spacing="-1">Pay</text>
+  
+  <!-- Tagline -->
+  <text x="175" y="148" font-family="'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="16" fill="#5a6270" letter-spacing="3" text-transform="uppercase">X402 · AI MICROSERVICES</text>
+</svg>

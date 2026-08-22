@@ -93,7 +93,8 @@ app.use(
             info: {
               input: { type: "http", method: "POST", body: { text: "string (200-20000 chars)" } },
               output: { type: "json", example: { summary: "string" } }
-            }
+            },
+            schema: {}
           }
         }
       },
@@ -108,7 +109,8 @@ app.use(
             info: {
               input: { type: "http", method: "POST", body: { text: "string (10-5000 chars)" } },
               output: { type: "json", example: { intent: "string", urgency: "string", lineOfBusiness: "string", confidence: 0.95 } }
-            }
+            },
+            schema: {}
           }
         }
       },
@@ -123,7 +125,8 @@ app.use(
             info: {
               input: { type: "http", method: "POST", body: { text: "string (10-20000 chars)" } },
               output: { type: "json", example: { fields: { name: "string", date: "string" } } }
-            }
+            },
+            schema: {}
           }
         }
       },
@@ -138,7 +141,8 @@ app.use(
             info: {
               input: { type: "http", method: "POST", body: { text: "string (10-20000 chars)" } },
               output: { type: "json", example: { classification: {}, extraction: {}, summary: "string" } }
-            }
+            },
+            schema: {}
           }
         }
       },
@@ -153,7 +157,8 @@ app.use(
             info: {
               input: { type: "http", method: "POST", body: { code: "string (10-4000 chars)", language: "string (optional)" } },
               output: { type: "json", example: { review: { issues: [], suggestions: [], score: 85 } } }
-            }
+            },
+            schema: {}
           }
         }
       },
@@ -168,7 +173,8 @@ app.use(
             info: {
               input: { type: "http", method: "POST", body: { text: "string (10-5000 chars)" } },
               output: { type: "json", example: { sentiment: "positive", confidence: 0.92, emotions: ["joy"], keywords: ["great"] } }
-            }
+            },
+            schema: {}
           }
         }
       },
@@ -183,7 +189,8 @@ app.use(
             info: {
               input: { type: "http", method: "POST", body: { text: "string (10-5000 chars)", targetLanguage: "string (default: Spanish)" } },
               output: { type: "json", example: { translation: "string", targetLanguage: "Spanish" } }
-            }
+            },
+            schema: {}
           }
         }
       },
@@ -355,7 +362,7 @@ function payerOf(req) {
 const INDEX_CSS = `:root{color-scheme:dark}
 body{font-family:ui-monospace,Menlo,monospace;background:#0b0e14;color:#d5d9e0;margin:0;padding:2rem;max-width:65rem;margin-inline:auto}
 .header-row{display:flex;align-items:center;gap:1.25rem;margin-bottom:1rem}
-.logo-img{width:64px;height:64px;border-radius:12px}
+.logo-img{width:64px;height:64px;border-radius:0}
 h1{color:#6ee7a0;font-size:2rem;margin:0}h2{color:#9dc3ff;margin-top:2rem}
 h2 i{color:#6ee7a0;font-style:normal}
 table{border-collapse:collapse;width:100%;margin-top:1rem}
@@ -399,7 +406,7 @@ function indexPage() {
 <link rel="icon" type="image/x-icon" href="/branding/final/favicon.ico">
 <link rel="apple-touch-icon" href="/branding/final/apple-touch-icon.png">
 <style>${INDEX_CSS}</style></head><body>
-<div class="header-row"><img src="/branding/final/logo-64.png" alt="AgentPay" class="logo-img"><h1>AgentPay</h1></div>
+<div class="header-row"><img src="/branding/final/wordmark-800.png" alt="AgentPay" class="logo-img" style="width:auto;height:48px"></div>
 <p class="tagline">AI microservices behind the <b>402 Payment Required</b> protocol (x402 / MPP).<br>No accounts. No API keys. Pay per call in <b>USDC on Base</b>.</p>
 <div><div class="stat"><b>$${gross}</b>gross revenue</div><div class="stat"><b>${paid}</b>paid requests</div><div class="stat"><b>7</b>services live</div><a href="/stats" class="cta">📊 Dashboard</a></div>
 <h2><i>✦</i> Services &amp; Pricing</h2>
