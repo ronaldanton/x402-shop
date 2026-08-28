@@ -164,10 +164,6 @@ app.get("/github", (req, res) => res.redirect(301, "https://github.com/ronaldant
 
 // Official MCP registry discovery (registry.modelcontextprotocol.io convention)
 app.use("/.well-known/mcp", express.static(path.join(process.cwd(), ".well-known", "mcp")));
-// MCP registry HTTP-domain auth: public keys for /.well-known/mcp-registry-auth
-app.get("/.well-known/mcp-registry-auth", (req, res) => {
-  res.type("application/json").send(fs.readFileSync(path.join(process.cwd(), ".well-known", "mcp-registry-auth"), "utf8"));
-});
 app.get("/stats", (req, res) => {
   const paid = ledger.filter(e => e.status === "paid");
   res.json({

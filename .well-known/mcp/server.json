@@ -1,18 +1,27 @@
 {
-  "$schema": "https://cdn.jsdelivr.net/npm/@modelcontextprotocol/sdk@latest/schema.json",
-  "name": "com.agentpay.help",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "help.agentpay/agentpay",
   "title": "AgentPay",
-  "description": "Pay-per-call AI microservices (summarize, insurance-lead classification, field extraction, sentiment, translation, code review, insurance analysis) via x402. USDC on Base, no accounts, no API keys — wallet is auth.",
+  "description": "Pay-per-call AI microservices via x402. USDC on Base, no accounts - wallet is auth.",
   "version": "1.0.0",
   "homepage": "https://agentpay.help",
-  "repository": "https://github.com/ronaldanton/x402-shop",
+  "repository": {
+    "url": "https://github.com/ronaldanton/x402-shop",
+    "source": "github"
+  },
   "license": "Apache-2.0",
-  "authors": [{ "name": "ronaldanton" }],
+  "authors": [
+    {
+      "name": "ronaldanton"
+    }
+  ],
   "server": {
     "type": "stdio",
     "entry_point": "mcp-server.js",
     "command": "node",
-    "args": ["mcp-server.js"],
+    "args": [
+      "mcp-server.js"
+    ],
     "env": {
       "SHOP_URL": "https://agentpay.help",
       "PAYMENT_NETWORK": "eip155:8453",
@@ -20,13 +29,34 @@
     }
   },
   "tools": [
-    { "name": "summarize", "description": "Summarize text (up to 20k chars) — $0.01/call" },
-    { "name": "classify-insurance", "description": "Insurance lead classification: intent, urgency, line of business — $0.02/call" },
-    { "name": "extract", "description": "Structured field extraction from emails/forms/docs — $0.03/call" },
-    { "name": "sentiment", "description": "Sentiment analysis with emotions and keywords — $0.02/call" },
-    { "name": "translate", "description": "Translate text to any language — $0.03/call" },
-    { "name": "code-review", "description": "AI code review: bugs, security, performance — $0.05/call" },
-    { "name": "insurance-analysis", "description": "Full bundle: classification + extraction + summary — $0.10/call" }
+    {
+      "name": "summarize",
+      "description": "Summarize text (up to 20k chars) \u2014 $0.01/call"
+    },
+    {
+      "name": "classify-insurance",
+      "description": "Insurance lead classification: intent, urgency, line of business \u2014 $0.02/call"
+    },
+    {
+      "name": "extract",
+      "description": "Structured field extraction from emails/forms/docs \u2014 $0.03/call"
+    },
+    {
+      "name": "sentiment",
+      "description": "Sentiment analysis with emotions and keywords \u2014 $0.02/call"
+    },
+    {
+      "name": "translate",
+      "description": "Translate text to any language \u2014 $0.03/call"
+    },
+    {
+      "name": "code-review",
+      "description": "AI code review: bugs, security, performance \u2014 $0.05/call"
+    },
+    {
+      "name": "insurance-analysis",
+      "description": "Full bundle: classification + extraction + summary \u2014 $0.10/call"
+    }
   ],
   "payment": {
     "protocol": "x402",
