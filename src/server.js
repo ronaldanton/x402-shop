@@ -138,7 +138,7 @@ app.get("/openapi.json", (req, res) => {
   }
   res.json({
     openapi: "3.0.3",
-    info: { title: "AgentPay", version: "1.0.0", description: "Pay-per-call AI microservices via x402 (HTTP 402). USDC on Base. No accounts, no API keys.", "x-base-url": PUBLIC_BASE },
+    info: { title: "AgentPay", version: "1.0.0", description: "Pay-per-call AI microservices via x402 (HTTP 402). USDC on Base. No accounts, no API keys.", "x-base-url": PUBLIC_BASE, contact: { name: "Ronald Anton", email: "ronaldanton@gmail.com" } },
     servers: [{ url: PUBLIC_BASE }],
     paths,
   });
