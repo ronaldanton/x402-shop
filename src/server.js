@@ -40,6 +40,7 @@ async function ollamaChat(model, messages, maxTokens = 300) {
 
 // ---------- App ----------
 const app = express();
+app.set("trust proxy", 1); // cloudflared (127.0.0.1) → nginx → app; respect X-Forwarded-Proto so 402 resource URLs are https
 app.use(express.json({ limit: "2mb" }));
 
 // Free routes first (no paywall): landing, discovery, dashboard
