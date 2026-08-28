@@ -79,6 +79,21 @@ const SERVICES = [
   { path: "/v1/translate", price: "$0.03", summary: "Text translation — translate to any language", body: { text: "string (10-5000 chars, required)", targetLanguage: "string (optional, default Spanish)" }, out: { translation: "string", targetLanguage: "string" } },
   { path: "/v1/code-review", price: "$0.05", summary: "AI code review — bugs, security, performance, quality score", body: { code: "string (10-4000 chars, required)", language: "string (optional)" }, out: { review: { issues: "array", suggestions: "array", score: "number" }, language: "string" } },
   { path: "/v1/insurance-analysis", price: "$0.10", summary: "Full insurance analysis bundle — classification + field extraction + summary in one call", body: { text: "string (10-20000 chars, required)" }, out: { classification: "object", extracted_fields: "object", summary: "string", confidence: "number", recommended_action: "string" } },
+  { path: "/v1/token-safety", price: "$0.02", summary: "Token safety check - rug pull risk, honeypot detection, liquidity analysis", body: { address: "string (0x... contract address, required)", chain: "string (optional)" }, out: { safe: "boolean", risk_score: "number (0-100)", flags: "string[]", liquidity_usd: "number", honeypot: "boolean" } },
+  { path: "/v1/wallet-risk", price: "$0.02", summary: "Wallet address risk screening - OFAC sanctions, scam flags, tx patterns", body: { address: "string (0x... wallet address, required)", chain: "string (optional)" }, out: { risk_level: "low|medium|high|critical", ofac_sanctioned: "boolean", scam_flagged: "boolean", total_txns: "number", risk_factors: "string[]" } },
+  { path: "/v1/web-scrape", price: "$0.01", summary: "Extract clean text from any URL - agents read web pages", body: { url: "string (required)", max_chars: "number (optional, default 5000)" }, out: { title: "string", content: "string", word_count: "number", published: "string" } },
+  { path: "/v1/crypto-price", price: "$0.005", summary: "Real-time crypto prices - price, 24h change, market cap, volume", body: { symbols: "string[] (e.g. [bitcoin,ethereum,solana])", vs_currency: "string (optional, default usd)" }, out: { prices: "object" } },
+  { path: "/v1/image-describe", price: "$0.03", summary: "Vision AI - describe any image from URL using multimodal model", body: { image_url: "string (required)", detail: "string (optional: brief|detailed)" }, out: { description: "string", objects: "string[]", text_found: "string" } },
+  { path: "/v1/defi-yields", price: "$0.01", summary: "DeFi yield data - APY, TVL, protocol info for top protocols", body: { protocol: "string (optional)", chain: "string (optional, default ethereum)" }, out: { yields: "array of {protocol, apy, tvl, chain, category}" } },
+  { path: "/v1/threat-intel", price: "$0.02", summary: "CVE/threat intelligence - vulnerability lookup, severity, exploits", body: { cve_id: "string (e.g. CVE-2024-1234)", keyword: "string (optional)" }, out: { cve_id: "string", severity: "string", description: "string" } },
+  { path: "/v1/sanctions-screen", price: "$0.02", summary: "OFAC/EU sanctions screening - check entity against sanctions lists", body: { name: "string (required)", type: "string (optional)" }, out: { sanctioned: "boolean", lists: "string[]", match_score: "number" } },
+  { path: "/v1/market-intel", price: "$0.02", summary: "Macro/economic snapshot - GDP, inflation, rates, employment", body: { country: "string (optional, default US)" }, out: { country: "string", data: "object" } },
+  { path: "/v1/on-chain-events", price: "$0.01", summary: "Decoded on-chain events - recent transfers for any address", body: { address: "string (0x... required)", chain: "string (optional)" }, out: { events: "array of {type, from, to, value, token, timestamp}" } },
+  { path: "/v1/content-safety", price: "$0.02", summary: "Content security scan - detect PII, toxicity, bias", body: { text: "string (required)" }, out: { safe: "boolean", flags: "string[]", pii_found: "string[]" } },
+  { path: "/v1/agent-reputation", price: "$0.01", summary: "Agent reputation score - verify x402 endpoint trustworthiness", body: { endpoint_url: "string (required)" }, out: { score: "number (0-100)", grade: "string", verified: "boolean" } },
+  { path: "/v1/legal-lookup", price: "$0.03", summary: "Legal/regulatory lookup - company registration, VAT verification", body: { query: "string (required)", jurisdiction: "string (optional)" }, out: { results: "array of {name, id, status, jurisdiction}" } },
+  { path: "/v1/news-feed", price: "$0.005", summary: "Real-time news feed - latest headlines by topic or keyword", body: { query: "string (required)", limit: "number (optional, default 5)" }, out: { articles: "array of {title, source, url, published}" } },
+  { path: "/v1/weather-data", price: "$0.005", summary: "Weather data - current conditions and forecast for any location", body: { location: "string (required)", days: "number (optional, default 1)" }, out: { location: "string", current: "object", forecast: "array" } },
 ];
 
 app.get("/robots.txt", (req, res) => {
@@ -509,6 +524,21 @@ const SERVICES_HTML = [
   { path: "POST /v1/translate", price: "$0.03", desc: "Text translation to any language", tag: "language" },
   { path: "POST /v1/code-review", price: "$0.05", desc: "AI code review — bugs, security, performance", tag: "dev" },
   { path: "POST /v1/insurance-analysis", price: "$0.10", desc: "⭐ FULL BUNDLE — classification + extraction + summary", tag: "bundle" },
+  { path: "POST /v1/token-safety", price: "$0.02", desc: "Token rug/honeypot check — liquidity, tax, pair age", tag: "crypto" },
+  { path: "POST /v1/wallet-risk", price: "$0.02", desc: "Wallet risk screening — OFAC sanctions, scam flags", tag: "security" },
+  { path: "POST /v1/web-scrape", price: "$0.01", desc: "Extract clean text from any URL — agents read web", tag: "data" },
+  { path: "POST /v1/crypto-price", price: "$0.005", desc: "Real-time crypto prices — BTC, ETH, SOL + more", tag: "crypto" },
+  { path: "POST /v1/image-describe", price: "$0.03", desc: "Vision AI — describe any image from URL", tag: "vision" },
+  { path: "POST /v1/defi-yields", price: "$0.01", desc: "DeFi yield data — APY, TVL, protocol info", tag: "defi" },
+  { path: "POST /v1/threat-intel", price: "$0.02", desc: "CVE/threat intelligence — vulnerability lookup", tag: "security" },
+  { path: "POST /v1/sanctions-screen", price: "$0.02", desc: "OFAC/EU sanctions screening — entity check", tag: "compliance" },
+  { path: "POST /v1/market-intel", price: "$0.02", desc: "Macro/economic snapshot — GDP, inflation, rates", tag: "economics" },
+  { path: "POST /v1/on-chain-events", price: "$0.01", desc: "Decoded on-chain events — recent transfers", tag: "blockchain" },
+  { path: "POST /v1/content-safety", price: "$0.02", desc: "Content security scan — PII, toxicity, bias", tag: "safety" },
+  { path: "POST /v1/agent-reputation", price: "$0.01", desc: "Agent reputation score — endpoint trustworthiness", tag: "trust" },
+  { path: "POST /v1/legal-lookup", price: "$0.03", desc: "Legal/regulatory lookup — company registration", tag: "legal" },
+  { path: "POST /v1/news-feed", price: "$0.005", desc: "Real-time news feed — headlines by topic", tag: "data" },
+  { path: "POST /v1/weather-data", price: "$0.005", desc: "Weather data — current conditions and forecast", tag: "data" },
 ].map(s => `<div class="card"><span class="price">${s.price}</span> <span class="path">${s.path}</span><div class="desc">${s.desc}</div><span class="tag">${s.tag}</span></div>`).join("");
 
 function indexPage() {
@@ -516,7 +546,7 @@ function indexPage() {
   const paid = ledger.filter(e=>e.status==="paid").length;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AgentPay — AI microservices via x402</title>
-<meta name="description" content="Pay-per-call AI services via the 402 Payment Required protocol. No accounts, no API keys — just USDC on Base.">
+<meta name="description" content="22 pay-per-call AI + crypto + data microservices via x402. No accounts, no API keys — just USDC on Base.">
 <meta property="og:title" content="AgentPay — AI microservices via x402"><meta property="og:description" content="Pay-per-call AI services. No accounts. No API keys. USDC on Base.">
 <meta property="og:image" content="/branding/final/og-image.png"><meta property="og:url" content="https://agentpay.help">
 <link rel="icon" type="image/x-icon" href="/branding/final/favicon.ico">
