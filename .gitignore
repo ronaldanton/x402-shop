@@ -3,3 +3,11 @@ branding/v2/
 marketing/screenshots/
 node_modules/
 .env
+
+# SECURITY: never commit secrets
+mainnet-wallet.json
+.env
+.env.testnet-backup
+.env.*
+*.pem
+*.key
