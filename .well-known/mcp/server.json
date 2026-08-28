@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "help.agentpay/agentpay",
   "title": "AgentPay",
-  "description": "Pay-per-call AI + crypto + data microservices via x402. 22 endpoints. USDC on Base.",
-  "version": "1.2.0",
+  "description": "22 pay-per-call AI + crypto + data microservices via x402. USDC on Base.",
+  "version": "1.3.0",
   "homepage": "https://agentpay.help",
   "repository": {
     "url": "https://github.com/ronaldanton/x402-shop",
@@ -31,91 +31,91 @@
   "tools": [
     {
       "name": "summarize",
-      "description": "AI text summarization - $0.01/call"
+      "description": "AI text summarization"
     },
     {
       "name": "classify-insurance",
-      "description": "Insurance lead classifier - $0.02/call"
+      "description": "Insurance lead classifier"
     },
     {
       "name": "sentiment",
-      "description": "Sentiment analysis - $0.02/call"
+      "description": "Sentiment analysis"
     },
     {
       "name": "extract",
-      "description": "Structured field extraction - $0.03/call"
+      "description": "Structured field extraction"
     },
     {
       "name": "translate",
-      "description": "Text translation - $0.03/call"
+      "description": "Text translation"
     },
     {
       "name": "code-review",
-      "description": "AI code review - $0.05/call"
+      "description": "AI code review"
     },
     {
       "name": "insurance-analysis",
-      "description": "Full insurance bundle - $0.10/call"
+      "description": "Full insurance bundle"
     },
     {
       "name": "token-safety",
-      "description": "Token rug/honeypot check - $0.02/call"
+      "description": "Token rug/honeypot check"
     },
     {
       "name": "wallet-risk",
-      "description": "Wallet risk screening - $0.02/call"
+      "description": "Wallet risk screening"
     },
     {
       "name": "web-scrape",
-      "description": "Extract text from URL - $0.01/call"
+      "description": "Extract text from URL"
     },
     {
       "name": "crypto-price",
-      "description": "Real-time crypto prices - $0.005/call"
+      "description": "Real-time crypto prices"
     },
     {
       "name": "image-describe",
-      "description": "Vision AI from URL - $0.03/call"
+      "description": "Vision AI from URL"
     },
     {
       "name": "defi-yields",
-      "description": "DeFi yield data - $0.01/call"
+      "description": "DeFi yield data"
     },
     {
       "name": "threat-intel",
-      "description": "CVE/threat intelligence - $0.02/call"
+      "description": "CVE/threat intelligence"
     },
     {
       "name": "sanctions-screen",
-      "description": "OFAC/EU sanctions screening - $0.02/call"
+      "description": "OFAC/EU sanctions"
     },
     {
       "name": "market-intel",
-      "description": "Macro/economic data - $0.02/call"
+      "description": "Macro/economic data"
     },
     {
       "name": "on-chain-events",
-      "description": "Decoded on-chain events - $0.01/call"
+      "description": "On-chain events"
     },
     {
       "name": "content-safety",
-      "description": "PII/toxicity/bias detection - $0.02/call"
+      "description": "PII/toxicity detection"
     },
     {
       "name": "agent-reputation",
-      "description": "Endpoint trustworthiness - $0.01/call"
+      "description": "Endpoint trustworthiness"
     },
     {
       "name": "legal-lookup",
-      "description": "Company/VAT verification - $0.03/call"
+      "description": "Company/VAT verification"
     },
     {
       "name": "news-feed",
-      "description": "Real-time news feed - $0.005/call"
+      "description": "Real-time news"
     },
     {
       "name": "weather-data",
-      "description": "Weather data - $0.005/call"
+      "description": "Weather data"
     }
   ],
   "payment": {
