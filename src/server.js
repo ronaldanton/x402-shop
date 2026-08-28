@@ -43,20 +43,8 @@ const app = express();
 app.set("trust proxy", 1); // cloudflared (127.0.0.1) → nginx → app; respect X-Forwarded-Proto so 402 resource URLs are https
 app.use(express.json({ limit: "2mb" }));
 
-// CORS — allow browser-based AI agents to call from any origin
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Payment");
-  res.header("Access-Control-Expose-Headers", "Payment-Required");
-  if (req.method === "OPTIONS") return res.sendStatus(204);
-  next();
-});
-
 // Free routes first (no paywall): landing, discovery, dashboard
 app.use("/branding", express.static(path.join(process.cwd(), "branding")));
-// Fix logo-512.png 404 — redirect to actual filename
-app.get("/branding/final/logo-512.png", (req, res) => res.redirect(301, "/branding/final/logo-clean-512.png"));
 app.get("/", (req, res) => {
   res.type("html").send(indexPage());
 });
@@ -91,6 +79,13 @@ const SERVICES = [
   { path: "/v1/translate", price: "$0.03", summary: "Text translation — translate to any language", body: { text: "string (10-5000 chars, required)", targetLanguage: "string (optional, default Spanish)" }, out: { translation: "string", targetLanguage: "string" } },
   { path: "/v1/code-review", price: "$0.05", summary: "AI code review — bugs, security, performance, quality score", body: { code: "string (10-4000 chars, required)", language: "string (optional)" }, out: { review: { issues: "array", suggestions: "array", score: "number" }, language: "string" } },
   { path: "/v1/insurance-analysis", price: "$0.10", summary: "Full insurance analysis bundle — classification + field extraction + summary in one call", body: { text: "string (10-20000 chars, required)" }, out: { classification: "object", extracted_fields: "object", summary: "string", confidence: "number", recommended_action: "string" } },
+
+  // x402scan trending services
+  { path: "/v1/token-safety", price: "$0.02", summary: "Token safety check - rug pull risk, honeypot detection, liquidity analysis", body: { address: "string (0x... contract address, required)", chain: "string (optional, default ethereum)" }, out: { safe: "boolean", risk_score: "number (0-100)", flags: "string[]", liquidity_usd: "number", pair_age_hours: "number", honeypot: "boolean" } },
+  { path: "/v1/wallet-risk", price: "$0.02", summary: "Wallet address risk screening - OFAC sanctions, scam flags, tx patterns", body: { address: "string (0x... wallet address, required)", chain: "string (optional, default ethereum)" }, out: { risk_level: "low|medium|high|critical", ofac_sanctioned: "boolean", scam_flagged: "boolean", total_txns: "number", risk_factors: "string[]" } },
+  { path: "/v1/web-scrape", price: "$0.01", summary: "Extract clean text from any URL - agents read web pages", body: { url: "string (required)", max_chars: "number (optional, default 5000)" }, out: { title: "string", content: "string", word_count: "number", published: "string" } },
+  { path: "/v1/crypto-price", price: "$0.005", summary: "Real-time crypto prices - price, 24h change, market cap, volume", body: { symbols: "string[] (e.g. [bitcoin,ethereum,solana])", vs_currency: "string (optional, default usd)" }, out: { prices: "object (symbol -> {price, change_24h, market_cap, volume})" } },
+  { path: "/v1/image-describe", price: "$0.03", summary: "Vision AI - describe any image from URL using multimodal model", body: { image_url: "string (required)", detail: "string (optional: brief|detailed)" }, out: { description: "string", objects: "string[]", text_found: "string" } },
 ];
 
 app.get("/robots.txt", (req, res) => {
@@ -169,18 +164,7 @@ app.get("/.well-known/agent.json", (req, res) => {
 });
 
 app.get("/sitemap.xml", (req, res) => {
-  const urls = [
-    `${PUBLIC_BASE}/`,
-    `${PUBLIC_BASE}/llms.txt`,
-    `${PUBLIC_BASE}/openapi.json`,
-    `${PUBLIC_BASE}/.well-known/agent.json`,
-    `${PUBLIC_BASE}/.well-known/x402`,
-    `${PUBLIC_BASE}/.well-known/mcp/server.json`,
-    `${PUBLIC_BASE}/health`,
-    `${PUBLIC_BASE}/stats`,
-  ];
-  const xml = urls.map(u => `<url><loc>${u}</loc></url>`).join("\n");
-  res.type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${xml}\n</urlset>`);
+  res.type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>${PUBLIC_BASE}/</loc></url>\n</urlset>`);
 });
 
 app.get("/github", (req, res) => res.redirect(301, "https://github.com/ronaldanton/x402-shop"));
@@ -317,6 +301,46 @@ app.use(
             schema: {}
           }
         }
+      },
+      "POST /v1/token-safety": {
+        accepts: [{ scheme: "exact", price: "$0.02", network: NETWORK, payTo: PAY_TO }],
+        description: "Token safety check - rug pull risk, honeypot detection, liquidity analysis",
+        mimeType: "application/json",
+        serviceName: "AgentPay Token Safety",
+        tags: ["crypto", "safety", "defi", "x402"],
+        extensions: { bazaar: { info: { input: { type: "http", method: "POST", body: { address: "0x... contract address", chain: "ethereum" } }, output: { type: "json", example: { safe: "boolean", risk_score: "number", flags: "string[]" } } }, schema: {} } }
+      },
+      "POST /v1/wallet-risk": {
+        accepts: [{ scheme: "exact", price: "$0.02", network: NETWORK, payTo: PAY_TO }],
+        description: "Wallet address risk screening - OFAC sanctions, scam flags, tx patterns",
+        mimeType: "application/json",
+        serviceName: "AgentPay Wallet Risk",
+        tags: ["crypto", "compliance", "security", "x402"],
+        extensions: { bazaar: { info: { input: { type: "http", method: "POST", body: { address: "0x... wallet address", chain: "ethereum" } }, output: { type: "json", example: { risk_level: "low|medium|high|critical", ofac_sanctioned: "boolean" } } }, schema: {} } }
+      },
+      "POST /v1/web-scrape": {
+        accepts: [{ scheme: "exact", price: "$0.01", network: NETWORK, payTo: PAY_TO }],
+        description: "Extract clean text from any URL - agents read web pages",
+        mimeType: "application/json",
+        serviceName: "AgentPay Web Scrape",
+        tags: ["data", "scraping", "web", "x402"],
+        extensions: { bazaar: { info: { input: { type: "http", method: "POST", body: { url: "https://...", max_chars: "number" } }, output: { type: "json", example: { title: "string", content: "string", word_count: "number" } } }, schema: {} } }
+      },
+      "POST /v1/crypto-price": {
+        accepts: [{ scheme: "exact", price: "$0.005", network: NETWORK, payTo: PAY_TO }],
+        description: "Real-time crypto prices - price, 24h change, market cap, volume",
+        mimeType: "application/json",
+        serviceName: "AgentPay Crypto Price",
+        tags: ["crypto", "price", "market-data", "x402"],
+        extensions: { bazaar: { info: { input: { type: "http", method: "POST", body: { symbols: "string[]", vs_currency: "usd" } }, output: { type: "json", example: { prices: "object" } } }, schema: {} } }
+      },
+      "POST /v1/image-describe": {
+        accepts: [{ scheme: "exact", price: "$0.03", network: NETWORK, payTo: PAY_TO }],
+        description: "Vision AI - describe any image from URL using multimodal model",
+        mimeType: "application/json",
+        serviceName: "AgentPay Image Describe",
+        tags: ["vision", "image", "multimodal", "x402"],
+        extensions: { bazaar: { info: { input: { type: "http", method: "POST", body: { image_url: "https://...", detail: "brief|detailed" } }, output: { type: "json", example: { description: "string", objects: "string[]" } } }, schema: {} } }
       },
     },
     new x402ResourceServer(facilitatorClient).register(NETWORK, new ExactEvmScheme()),
@@ -517,6 +541,11 @@ const SERVICES_HTML = [
   { path: "POST /v1/translate", price: "$0.03", desc: "Text translation to any language", tag: "language" },
   { path: "POST /v1/code-review", price: "$0.05", desc: "AI code review — bugs, security, performance", tag: "dev" },
   { path: "POST /v1/insurance-analysis", price: "$0.10", desc: "⭐ FULL BUNDLE — classification + extraction + summary", tag: "bundle" },
+  { path: "POST /v1/token-safety", price: "$0.02", desc: "Token rug/honeypot check — liquidity, tax, pair age", tag: "crypto" },
+  { path: "POST /v1/wallet-risk", price: "$0.02", desc: "Wallet risk screening — OFAC sanctions, scam flags", tag: "security" },
+  { path: "POST /v1/web-scrape", price: "$0.01", desc: "Extract clean text from any URL — agents read web", tag: "data" },
+  { path: "POST /v1/crypto-price", price: "$0.005", desc: "Real-time crypto prices — BTC, ETH, SOL + more", tag: "crypto" },
+  { path: "POST /v1/image-describe", price: "$0.03", desc: "Vision AI — describe any image from URL", tag: "vision" },
 ].map(s => `<div class="card"><span class="price">${s.price}</span> <span class="path">${s.path}</span><div class="desc">${s.desc}</div><span class="tag">${s.tag}</span></div>`).join("");
 
 function indexPage() {
@@ -526,34 +555,7 @@ function indexPage() {
 <title>AgentPay — AI microservices via x402</title>
 <meta name="description" content="Pay-per-call AI services via the 402 Payment Required protocol. No accounts, no API keys — just USDC on Base.">
 <meta property="og:title" content="AgentPay — AI microservices via x402"><meta property="og:description" content="Pay-per-call AI services. No accounts. No API keys. USDC on Base.">
-<meta property="og:image" content="https://agentpay.help/branding/final/og-image.png"><meta property="og:url" content="https://agentpay.help">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="AgentPay \u2014 AI microservices via x402">
-<meta name="twitter:description" content="Pay-per-call AI services. No accounts. No API keys. USDC on Base.">
-<meta name="twitter:image" content="https://agentpay.help/branding/final/og-image.png">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "AgentPay",
-  "description": "Pay-per-call AI microservices via the x402 protocol. USDC on Base. No accounts, no API keys.",
-  "url": "https://agentpay.help",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Any",
-  "offers": [
-    {"@type": "Offer", "name": "Summarize", "price": "0.01", "priceCurrency": "USD"},
-    {"@type": "Offer", "name": "Classify Insurance", "price": "0.02", "priceCurrency": "USD"},
-    {"@type": "Offer", "name": "Sentiment Analysis", "price": "0.02", "priceCurrency": "USD"},
-    {"@type": "Offer", "name": "Field Extraction", "price": "0.03", "priceCurrency": "USD"},
-    {"@type": "Offer", "name": "Translation", "price": "0.03", "priceCurrency": "USD"},
-    {"@type": "Offer", "name": "Code Review", "price": "0.05", "priceCurrency": "USD"},
-    {"@type": "Offer", "name": "Insurance Analysis Bundle", "price": "0.10", "priceCurrency": "USD"}
-  ],
-  "author": {"@type": "Person", "name": "Ronald Anton"},
-  "codeRepository": "https://github.com/ronaldanton/x402-shop",
-  "license": "https://www.apache.org/licenses/LICENSE-2.0"
-}
-</script>
+<meta property="og:image" content="/branding/final/og-image.png"><meta property="og:url" content="https://agentpay.help">
 <link rel="icon" type="image/x-icon" href="/branding/final/favicon.ico">
 <link rel="apple-touch-icon" href="/branding/final/apple-touch-icon.png">
 <style>${INDEX_CSS}</style></head><body>
@@ -576,6 +578,134 @@ x402 fetch pays &amp; returns your result. See README.</code></pre>
 <p class="powered">Powered by <a href="https://github.com/ronaldanton/x402-shop">x402-shop</a> · <a href="https://x402.org">x402 protocol</a> · Built on Base</p></body></html>`;
 
 }
+
+// ========== NEW SERVICES: x402scan trending ==========
+
+// 1. TOKEN SAFETY - rug pull detection using DexScreener
+app.post("/v1/token-safety", async (req, res) => {
+  try {
+    const { address, chain = "ethereum" } = req.body;
+    if (!address || !address.startsWith("0x")) return res.status(400).json({ error: "Valid 0x address required" });
+    const dexRes = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${address}`);
+    const dexData = await dexRes.json();
+    const pairs = dexData.pairs || [];
+    if (pairs.length === 0) {
+      return res.json({ safe: false, risk_score: 95, flags: ["no_liquidity", "no_pairs_found"], liquidity_usd: 0, pair_age_hours: 0, honeypot: true });
+    }
+    const pair = pairs[0];
+    const liquidity = pair.liquidity?.usd || 0;
+    const pairAge = pair.pairCreatedAt ? (Date.now() - new Date(pair.pairCreatedAt).getTime()) / 3600000 : 0;
+    const buyTax = pair.fees?.buy || 0;
+    const sellTax = pair.fees?.sell || 0;
+    let riskScore = 0;
+    const flags = [];
+    if (liquidity < 10000) { riskScore += 30; flags.push("low_liquidity"); }
+    if (liquidity < 1000) { riskScore += 20; flags.push("very_low_liquidity"); }
+    if (pairAge < 24) { riskScore += 25; flags.push("new_pair"); }
+    if (pairAge < 1) { riskScore += 15; flags.push("brand_new"); }
+    if (buyTax > 10) { riskScore += 20; flags.push("high_buy_tax"); }
+    if (sellTax > 10) { riskScore += 25; flags.push("high_sell_tax"); }
+    if (sellTax > 50) { riskScore += 15; flags.push("extreme_sell_tax"); }
+    if (!pair.info?.websites?.length) { riskScore += 10; flags.push("no_website"); }
+    if (!pair.info?.socials?.length) { riskScore += 10; flags.push("no_socials"); }
+    const honeypot = sellTax > 90 || (sellTax > 50 && buyTax < 5);
+    if (honeypot) { riskScore += 30; flags.push("likely_honeypot"); }
+    riskScore = Math.min(100, riskScore);
+    res.json({ safe: riskScore < 40, risk_score: riskScore, flags, liquidity_usd: liquidity, pair_age_hours: Math.round(pairAge), buy_tax: buyTax, sell_tax: sellTax, honeypot, verified: !!(pair.info?.websites?.length || pair.info?.socials?.length) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// 2. WALLET RISK - address screening
+app.post("/v1/wallet-risk", async (req, res) => {
+  try {
+    const { address, chain = "ethereum" } = req.body;
+    if (!address || !address.startsWith("0x")) return res.status(400).json({ error: "Valid 0x address required" });
+    let totalTxns = 0, firstSeen = null, lastActive = null;
+    const riskFactors = [];
+    try {
+      const bsRes = await fetch(`https://blockscout.com/eth/mainnet/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=desc&page=1&offset=5`);
+      const data = await bsRes.json();
+      const txns = data.result || [];
+      totalTxns = txns.length;
+      if (txns.length > 0) {
+        firstSeen = new Date(parseInt(txns[txns.length - 1].timeStamp) * 1000).toISOString().split("T")[0];
+        lastActive = new Date(parseInt(txns[0].timeStamp) * 1000).toISOString().split("T")[0];
+      }
+    } catch {}
+    if (totalTxns === 0) riskFactors.push("no_transactions");
+    if (firstSeen) {
+      const ageDays = (Date.now() - new Date(firstSeen).getTime()) / 86400000;
+      if (ageDays < 7) riskFactors.push("very_new_address");
+      else if (ageDays < 30) riskFactors.push("new_address");
+    }
+    let ofacSanctioned = false;
+    try {
+      const ofacRes = await fetch("https://api.ofac-api.com/v4/search", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ address: address.toLowerCase() }) });
+      if (ofacRes.ok) { const d = await ofacRes.json(); ofacSanctioned = (d.matches || []).length > 0; if (ofacSanctioned) riskFactors.push("ofac_sanctioned"); }
+    } catch {}
+    let riskLevel = "low";
+    if (ofacSanctioned) riskLevel = "critical";
+    else if (riskFactors.includes("very_new_address") && totalTxns < 3) riskLevel = "high";
+    else if (riskFactors.length > 2) riskLevel = "medium";
+    res.json({ risk_level: riskLevel, ofac_sanctioned: ofacSanctioned, scam_flagged: ofacSanctioned, total_txns: totalTxns, first_seen: firstSeen || "unknown", last_active: lastActive || "unknown", risk_factors: riskFactors });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// 3. WEB SCRAPE - extract content from URL using Jina Reader
+app.post("/v1/web-scrape", async (req, res) => {
+  try {
+    const { url, max_chars = 5000 } = req.body;
+    if (!url || !url.startsWith("http")) return res.status(400).json({ error: "Valid HTTP(S) URL required" });
+    const jinaRes = await fetch(`https://r.jina.ai/${url}`, { headers: { "Accept": "text/plain", "X-Return-Format": "text" }, signal: AbortSignal.timeout(15000) });
+    if (!jinaRes.ok) return res.status(502).json({ error: `Upstream error: ${jinaRes.status}` });
+    const fullText = await jinaRes.text();
+    const lines = fullText.split("\n");
+    const title = lines.find(l => l.startsWith("Title:"))?.replace("Title:", "").trim() || "";
+    const published = lines.find(l => l.startsWith("Published Time:"))?.replace("Published Time:", "").trim() || "";
+    const content = fullText.replace(/^Title:.*$/m, "").replace(/^URL Source:.*$/m, "").replace(/^Published Time:.*$/m, "").replace(/^Markdown Content:.*$/m, "").trim().slice(0, max_chars);
+    const wordCount = content.split(/\s+/).filter(Boolean).length;
+    res.json({ title, content, word_count: wordCount, published });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// 4. CRYPTO PRICE - real-time prices from CoinGecko
+app.post("/v1/crypto-price", async (req, res) => {
+  try {
+    const { symbols = ["bitcoin"], vs_currency = "usd" } = req.body;
+    if (!Array.isArray(symbols) || symbols.length === 0) return res.status(400).json({ error: "symbols array required" });
+    if (symbols.length > 20) return res.status(400).json({ error: "Max 20 symbols per request" });
+    const ids = symbols.map(s => s.toLowerCase().replace(/\s+/g, "-")).join(",");
+    const cgRes = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=${vs_currency}&include_24hr_change=true&include_market_cap=true&include_24hr_vol=true`, { signal: AbortSignal.timeout(10000) });
+    if (!cgRes.ok) return res.status(502).json({ error: `CoinGecko error: ${cgRes.status}` });
+    const data = await cgRes.json();
+    const prices = {};
+    for (const [id, vals] of Object.entries(data)) {
+      prices[id] = { price: vals[vs_currency], change_24h: vals[`${vs_currency}_24h_change`], market_cap: vals[`${vs_currency}_market_cap`], volume: vals[`${vs_currency}_24h_vol`] };
+    }
+    res.json({ prices });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// 5. IMAGE DESCRIBE - vision AI from URL
+app.post("/v1/image-describe", async (req, res) => {
+  try {
+    const { image_url, detail = "brief" } = req.body;
+    if (!image_url) return res.status(400).json({ error: "image_url required" });
+    const model = "moondream:latest";
+    const prompt = detail === "detailed" ? "Describe this image in detail. List all visible objects, any text found, the mood/atmosphere, colors, and composition." : "Briefly describe this image in 2-3 sentences. List the main objects and any text visible.";
+    const ollamaRes = await fetch(`${OLLAMA_URL}/api/chat`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model, messages: [{ role: "user", content: prompt, images: [image_url] }], stream: false }), signal: AbortSignal.timeout(30000) });
+    if (!ollamaRes.ok) return res.status(502).json({ error: `Vision model error: ${ollamaRes.status}` });
+    const data = await ollamaRes.json();
+    const description = data.message?.content || "Could not describe image";
+    const objects = description.match(/[A-Z][a-z]+(?:\s+[a-z]+)*/g)?.slice(0, 10) || [];
+    res.json({ description, objects: [...new Set(objects)], text_found: description.includes("text") ? "See description" : "None detected" });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ---------- catch-all 404 ----------
+app.use((req, res) => {
+  res.status(404).json({ error: "Not found" });
+});
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`AgentPay listening on :${PORT}`);
