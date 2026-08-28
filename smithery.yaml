@@ -1,0 +1,31 @@
+# Smithery configuration for AgentPay MCP server
+# Wraps agentpay.help x402-paywalled AI microservices as MCP tools.
+# Payment happens automatically via x402 from BUYER_PRIVATE_KEY.
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      buyerPrivateKey:
+        type: string
+        title: Buyer Private Key
+        description: Hex private key of the wallet used to pay for API calls (USDC on Base via x402).
+      shopUrl:
+        type: string
+        title: Shop URL
+        description: Base URL of the AgentPay x402 seller (default https://agentpay.help)
+        default: https://agentpay.help
+    required:
+      - buyerPrivateKey
+  commandFunction:
+    |-
+    (config) => ({
+      "command": "node",
+      "args": ["mcp-server.js"],
+      "env": {
+        "SHOP_URL": config.shopUrl || "https://agentpay.help",
+        "PAYMENT_NETWORK": "eip155:8453",
+        "BUYER_PRIVATE_KEY": config.buyerPrivateKey
+      }
+    })

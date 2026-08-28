@@ -160,6 +160,9 @@ app.get("/sitemap.xml", (req, res) => {
 });
 
 app.get("/github", (req, res) => res.redirect(301, "https://github.com/ronaldanton/x402-shop"));
+
+// Official MCP registry discovery (registry.modelcontextprotocol.io convention)
+app.use("/.well-known/mcp", express.static(path.join(process.cwd(), ".well-known", "mcp")));
 app.get("/stats", (req, res) => {
   const paid = ledger.filter(e => e.status === "paid");
   res.json({

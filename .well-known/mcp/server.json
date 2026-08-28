@@ -1,0 +1,37 @@
+{
+  "$schema": "https://cdn.jsdelivr.net/npm/@modelcontextprotocol/sdk@latest/schema.json",
+  "name": "com.agentpay.help",
+  "title": "AgentPay",
+  "description": "Pay-per-call AI microservices (summarize, insurance-lead classification, field extraction, sentiment, translation, code review, insurance analysis) via x402. USDC on Base, no accounts, no API keys — wallet is auth.",
+  "version": "1.0.0",
+  "homepage": "https://agentpay.help",
+  "repository": "https://github.com/ronaldanton/x402-shop",
+  "license": "Apache-2.0",
+  "authors": [{ "name": "ronaldanton" }],
+  "server": {
+    "type": "stdio",
+    "entry_point": "mcp-server.js",
+    "command": "node",
+    "args": ["mcp-server.js"],
+    "env": {
+      "SHOP_URL": "https://agentpay.help",
+      "PAYMENT_NETWORK": "eip155:8453",
+      "BUYER_PRIVATE_KEY": "${BUYER_PRIVATE_KEY}"
+    }
+  },
+  "tools": [
+    { "name": "summarize", "description": "Summarize text (up to 20k chars) — $0.01/call" },
+    { "name": "classify-insurance", "description": "Insurance lead classification: intent, urgency, line of business — $0.02/call" },
+    { "name": "extract", "description": "Structured field extraction from emails/forms/docs — $0.03/call" },
+    { "name": "sentiment", "description": "Sentiment analysis with emotions and keywords — $0.02/call" },
+    { "name": "translate", "description": "Translate text to any language — $0.03/call" },
+    { "name": "code-review", "description": "AI code review: bugs, security, performance — $0.05/call" },
+    { "name": "insurance-analysis", "description": "Full bundle: classification + extraction + summary — $0.10/call" }
+  ],
+  "payment": {
+    "protocol": "x402",
+    "network": "eip155:8453",
+    "currency": "USDC",
+    "note": "Each tool call pays the agentpay.help endpoint via x402 automatic payment from BUYER_PRIVATE_KEY wallet."
+  }
+}
