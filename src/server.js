@@ -67,6 +67,99 @@ app.get("/.well-known/x402", (req, res) => {
 });
 
 app.get("/health", (req, res) => res.json({ ok: true, ts: new Date().toISOString() }));
+
+// ---------- Agent discovery endpoints (llms.txt, OpenAPI, robots, agent card) ----------
+const PUBLIC_BASE = process.env.PUBLIC_URL || "https://agentpay.help";
+const SERVICES = [
+  { path: "/v1/summarize", price: "$0.01", summary: "AI text summarization — crisp 250-word summary of any text up to 20k chars", body: { text: "string (200-20000 chars, required)" }, out: { summary: "string", words: "number" } },
+  { path: "/v1/classify-insurance", price: "$0.02", summary: "Insurance lead classifier — intent, urgency, line of business, confidence", body: { text: "string (10-5000 chars, required)" }, out: { intent: "quote_request|renewal|claim|complaint|other", urgency: "low|medium|high", line: "auto|home|life|health|commercial|other", confidence: "number" } },
+  { path: "/v1/sentiment", price: "$0.02", summary: "Sentiment analysis — positive/negative/neutral with emotions and keywords", body: { text: "string (10-5000 chars, required)" }, out: { sentiment: "positive|negative|neutral", confidence: "number", emotions: "string[]", keywords: "string[]" } },
+  { path: "/v1/extract", price: "$0.03", summary: "Structured field extraction — key-value pairs from emails, forms, documents", body: { text: "string (required)", fields: "string[] (optional — fields to extract)" }, out: { "<field>": "value (JSON object of extracted fields)" } },
+  { path: "/v1/translate", price: "$0.03", summary: "Text translation — translate to any language", body: { text: "string (10-5000 chars, required)", targetLanguage: "string (optional, default Spanish)" }, out: { translation: "string", targetLanguage: "string" } },
+  { path: "/v1/code-review", price: "$0.05", summary: "AI code review — bugs, security, performance, quality score", body: { code: "string (10-4000 chars, required)", language: "string (optional)" }, out: { review: { issues: "array", suggestions: "array", score: "number" }, language: "string" } },
+  { path: "/v1/insurance-analysis", price: "$0.10", summary: "Full insurance analysis bundle — classification + field extraction + summary in one call", body: { text: "string (10-20000 chars, required)" }, out: { classification: "object", extracted_fields: "object", summary: "string", confidence: "number", recommended_action: "string" } },
+];
+
+app.get("/robots.txt", (req, res) => {
+  res.type("text/plain").send(`User-agent: *\nAllow: /\n\nSitemap: ${PUBLIC_BASE}/sitemap.xml\n`);
+});
+
+app.get("/llms.txt", (req, res) => {
+  const lines = [
+    `# AgentPay`,
+    ``,
+    `> Pay-per-call AI microservices via the x402 protocol (HTTP 402 Payment Required). USDC on Base. No accounts, no API keys — wallet is auth.`,
+    ``,
+    `Base URL: ${PUBLIC_BASE}`,
+    `Auth: x402 payment flow — any unauthenticated POST returns HTTP 402 with payment instructions; an x402 client pays and retries automatically.`,
+    `Network: ${NETWORK} | Settlement: USDC | Facilitator: ${FACILITATOR}`,
+    ``,
+    `## Services`,
+    ...SERVICES.map(s => `- \`POST ${s.path}\`: ${s.summary}. Price: ${s.price} per call. Body: ${JSON.stringify(s.body)}.`),
+    ``,
+    `## Machine discovery`,
+    `- [x402 catalog](${PUBLIC_BASE}/.well-known/x402) — machine-readable endpoint catalog`,
+    `- [OpenAPI spec](${PUBLIC_BASE}/openapi.json) — full OpenAPI 3.0`,
+    `- [Agent card](${PUBLIC_BASE}/.well-known/agent.json)`,
+    `- [Health](${PUBLIC_BASE}/health) — liveness probe`,
+    `- [Stats](${PUBLIC_BASE}/stats) — live paid-request stats`,
+    `- [GitHub](${PUBLIC_BASE}/github) — source code (Apache-2.0)`,
+    ``,
+    `## MCP`,
+    `MCP server (stdio) that wraps all paid endpoints and handles x402 payment automatically: \`npx github:ronaldanton/x402-shop mcp-server.js\` (env: SHOP_URL=${PUBLIC_BASE}, BUYER_PRIVATE_KEY=<hex key>).`,
+    ``,
+    `## Example`,
+    `\`curl -i -X POST ${PUBLIC_BASE}/v1/summarize -H 'Content-Type: application/json' -d '{"text":"..."}'\` → HTTP 402 with payment terms.`,
+  ];
+  res.type("text/plain").send(lines.join("\n"));
+});
+
+app.get("/openapi.json", (req, res) => {
+  const paths = {};
+  for (const s of SERVICES) {
+    paths[s.path] = {
+      post: {
+        summary: s.summary,
+        operationId: s.path.replace("/v1/", ""),
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { type: "object", properties: Object.fromEntries(Object.entries(s.body).map(([k, v]) => [k, { type: "string", description: v }])) } } },
+        },
+        responses: {
+          "402": { description: "Payment Required — x402 payment instructions in response body" },
+          "200": { description: "Service result (after x402 payment)", content: { "application/json": { schema: { type: "object", properties: { result: { type: "string", example: JSON.stringify(s.out) } } } } } },
+        },
+        "x-price": s.price,
+        "x-payment": { scheme: "exact", network: NETWORK, currency: "USDC" },
+        tags: ["agentpay"],
+      },
+    };
+  }
+  res.json({
+    openapi: "3.0.3",
+    info: { title: "AgentPay", version: "1.0.0", description: "Pay-per-call AI microservices via x402 (HTTP 402). USDC on Base. No accounts, no API keys.", "x-base-url": PUBLIC_BASE },
+    servers: [{ url: PUBLIC_BASE }],
+    paths,
+  });
+});
+
+app.get("/.well-known/agent.json", (req, res) => {
+  res.json({
+    name: "AgentPay",
+    description: "Pay-per-call AI microservices (summarize, classify, extract, translate, sentiment, code-review, insurance-analysis) via x402. USDC on Base, no accounts.",
+    url: PUBLIC_BASE,
+    version: "1.0.0",
+    protocol: "x402",
+    capabilities: SERVICES.map(s => ({ id: s.path.replace("/v1/", ""), endpoint: `${PUBLIC_BASE}${s.path}`, method: "POST", price_usd: parseFloat(s.price.replace("$", "")), description: s.summary })),
+    discovery: { x402: `${PUBLIC_BASE}/.well-known/x402`, openapi: `${PUBLIC_BASE}/openapi.json`, llms: `${PUBLIC_BASE}/llms.txt` },
+  });
+});
+
+app.get("/sitemap.xml", (req, res) => {
+  res.type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>${PUBLIC_BASE}/</loc></url>\n</urlset>`);
+});
+
+app.get("/github", (req, res) => res.redirect(301, "https://github.com/ronaldanton/x402-shop"));
 app.get("/stats", (req, res) => {
   const paid = ledger.filter(e => e.status === "paid");
   res.json({
@@ -421,7 +514,7 @@ curl -i -X POST https://agentpay.help/v1/summarize \
 npm i @x402/fetch viem
 x402 fetch pays &amp; returns your result. See README.</code></pre>
 <h2><i>✦</i> For AI Agents</h2>
-<p>Machine-readable catalog: <code><a href="/.well-known/x402">/.well-known/x402</a></code> · Health: <code><a href="/health">/health</a></code></p>
+<p>Machine-readable: <code><a href="/llms.txt">llms.txt</a></code> · <code><a href="/.well-known/x402">x402 catalog</a></code> · <code><a href="/openapi.json">OpenAPI</a></code> · <code><a href="/.well-known/agent.json">agent.json</a></code> · Health: <code><a href="/health">/health</a></code> · <a href="https://github.com/ronaldanton/x402-shop">Source (Apache-2.0)</a></p>
 <p class="powered">Powered by <a href="https://github.com/ronaldanton/x402-shop">x402-shop</a> · <a href="https://x402.org">x402 protocol</a> · Built on Base</p></body></html>`;
 
 }

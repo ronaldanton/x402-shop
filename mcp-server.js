@@ -20,7 +20,7 @@ import { ExactEvmScheme } from "@x402/evm/exact/client";
 import { privateKeyToAccount } from "viem/accounts";
 
 // ── Configuration ──────────────────────────────────────────────────────────────
-const SHOP_URL = process.env.SHOP_URL || "https://yard-singer-minus-drain.trycloudflare.com";
+const SHOP_URL = process.env.SHOP_URL || "https://agentpay.help";
 const NETWORK = process.env.PAYMENT_NETWORK || "eip155:84532";
 const PRIVATE_KEY = process.env.BUYER_PRIVATE_KEY;
 
