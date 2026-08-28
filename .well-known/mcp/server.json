@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "help.agentpay/agentpay",
   "title": "AgentPay",
-  "description": "Pay-per-call AI microservices via x402. USDC on Base, no accounts - wallet is auth.",
-  "version": "1.0.0",
+  "description": "Pay-per-call AI + crypto microservices via x402. 12 endpoints. USDC on Base.",
+  "version": "1.1.0",
   "homepage": "https://agentpay.help",
   "repository": {
     "url": "https://github.com/ronaldanton/x402-shop",
@@ -56,6 +56,26 @@
     {
       "name": "insurance-analysis",
       "description": "Full bundle: classification + extraction + summary \u2014 $0.10/call"
+    },
+    {
+      "name": "token-safety",
+      "description": "Token rug/honeypot check - liquidity, tax, pair age analysis - $0.02/call"
+    },
+    {
+      "name": "wallet-risk",
+      "description": "Wallet risk screening - OFAC sanctions, scam flags - $0.02/call"
+    },
+    {
+      "name": "web-scrape",
+      "description": "Extract clean text from any URL - $0.01/call"
+    },
+    {
+      "name": "crypto-price",
+      "description": "Real-time crypto prices - BTC, ETH, SOL + more - $0.005/call"
+    },
+    {
+      "name": "image-describe",
+      "description": "Vision AI - describe any image from URL - $0.03/call"
     }
   ],
   "payment": {
