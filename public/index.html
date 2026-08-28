@@ -1,0 +1,136 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AgentPay — 22 AI Microservices via x402 | Pay Per Call in USDC</title>
+<meta name="description" content="22 pay-per-call AI, crypto, and data microservices via the x402 protocol. No accounts, no API keys — just USDC on Base.">
+<meta property="og:title" content="AgentPay — AI Microservices via x402"><meta property="og:description" content="22 pay-per-call services. No accounts. No API keys. USDC on Base.">
+<meta property="og:image" content="https://agentpay.help/branding/final/og-image.png"><meta property="og:url" content="https://agentpay.help">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="AgentPay — AI Microservices via x402"><meta name="twitter:description" content="22 pay-per-call services. No accounts. No API keys. USDC on Base."><meta name="twitter:image" content="https://agentpay.help/branding/final/og-image.png">
+<link rel="icon" type="image/x-icon" href="/branding/final/favicon.ico">
+<link rel="apple-touch-icon" href="/branding/final/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"AgentPay","description":"22 pay-per-call AI microservices via x402","url":"https://agentpay.help","applicationCategory":"DeveloperApplication","offers":[{"@type":"Offer","name":"Summarize","price":"0.01","priceCurrency":"USD"},{"@type":"Offer","name":"Code Review","price":"0.05","priceCurrency":"USD"}],"author":{"@type":"Person","name":"Ronald Anton"}}</script>
+<style>
+:root{color-scheme:dark;--bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a25;--border:#2a2a3a;--text:#e4e4e7;--text2:#a1a1aa;--accent:#6ee7a0;--accent2:#34d399;--blue:#60a5fa;--purple:#a78bfa;--orange:#fb923c;--pink:#f472b6;--red:#f87171;--yellow:#fbbf24;--radius:12px;--radius-lg:16px;--shadow:0 4px 24px rgba(0,0,0,0.3)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+.container{max-width:1200px;margin:0 auto;padding:0 1.5rem}
+a{color:var(--accent);text-decoration:none;transition:color .2s}a:hover{color:var(--accent2)}
+code,pre{font-family:'JetBrains Mono',monospace}
+.hero{text-align:center;padding:4rem 0 3rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 50% 50%,rgba(110,231,160,0.08) 0%,transparent 50%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:.4rem 1rem;font-size:.8rem;color:var(--accent);margin-bottom:1.5rem}
+.hero-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.hero h1{font-size:clamp(2.5rem,5vw,4rem);font-weight:800;line-height:1.1;margin-bottom:1rem;background:linear-gradient(135deg,#fff 0%,var(--accent) 50%,var(--blue) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:1.15rem;color:var(--text2);max-width:600px;margin:0 auto 2rem;line-height:1.7}
+.hero-cta{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:var(--radius);font-weight:600;font-size:.95rem;transition:all .2s;cursor:pointer;border:none;text-decoration:none}
+.btn-primary{background:var(--accent);color:#000}.btn-primary:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 20px rgba(110,231,160,0.3)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--surface);border-color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin:3rem 0}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;text-align:center;transition:all .2s}
+.stat:hover{border-color:var(--accent);transform:translateY(-2px)}
+.stat .num{font-size:2rem;font-weight:800;color:var(--accent);display:block}
+.stat .label{font-size:.8rem;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-top:.25rem}
+.section{padding:3rem 0}
+.section-title{font-size:1.75rem;font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.75rem}
+.section-title .icon{font-size:1.5rem}
+.section-desc{color:var(--text2);margin-bottom:2rem;font-size:1rem}
+.services-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+.service-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;transition:all .25s;position:relative;overflow:hidden}
+.service-card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:var(--shadow)}
+.service-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--blue));opacity:0;transition:opacity .25s}
+.service-card:hover::before{opacity:1}
+.service-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem;gap:.5rem;flex-wrap:wrap}
+.service-price{background:linear-gradient(135deg,rgba(110,231,160,0.15),rgba(96,165,250,0.15));color:var(--accent);font-weight:700;font-size:1.1rem;padding:.25rem .75rem;border-radius:8px;white-space:nowrap}
+.service-path{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--blue);background:rgba(96,165,250,0.1);padding:.25rem .5rem;border-radius:6px;word-break:break-all}
+.service-name{font-weight:600;font-size:1rem;margin-bottom:.5rem;color:var(--text)}
+.service-desc{color:var(--text2);font-size:.85rem;line-height:1.5}
+.service-tags{display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap}
+.tag{font-size:.7rem;padding:.2rem .6rem;border-radius:6px;font-weight:500;text-transform:uppercase;letter-spacing:.03em}
+.tag-ai{background:rgba(167,139,250,0.15);color:var(--purple)}
+.tag-crypto{background:rgba(251,191,36,0.15);color:var(--yellow)}
+.tag-security{background:rgba(248,113,113,0.15);color:var(--red)}
+.tag-data{background:rgba(96,165,250,0.15);color:var(--blue)}
+.tag-compliance{background:rgba(244,114,182,0.15);color:var(--pink)}
+.tag-vision{background:rgba(251,146,60,0.15);color:var(--orange)}
+.code-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;margin:2rem 0}
+.code-section h3{color:var(--accent);margin-bottom:1rem;font-size:1.25rem}
+.code-block{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;overflow-x:auto;font-size:.85rem;line-height:1.8}
+.code-block .c{color:var(--text2)}.code-block .s{color:var(--accent)}.code-block .k{color:var(--purple)}.code-block .f{color:var(--blue)}
+.trust{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:2rem 0}
+.trust-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;text-align:center;transition:all .2s}
+.trust-item:hover{border-color:var(--accent)}
+.trust-icon{font-size:2rem;margin-bottom:.5rem}
+.trust-title{font-weight:600;margin-bottom:.25rem}
+.trust-desc{color:var(--text2);font-size:.8rem}
+.footer{border-top:1px solid var(--border);padding:2rem 0;margin-top:3rem;text-align:center}
+.footer-links{display:flex;gap:2rem;justify-content:center;margin-bottom:1rem;flex-wrap:wrap}
+.footer-links a{color:var(--text2);font-size:.85rem;transition:color .2s}.footer-links a:hover{color:var(--accent)}
+.footer-copy{color:var(--text2);font-size:.8rem}
+@media(max-width:768px){.hero h1{font-size:2rem}.stats{grid-template-columns:repeat(2,1fr)}.services-grid{grid-template-columns:1fr}.trust{grid-template-columns:1fr}}
+</style></head><body>
+<div class="container">
+<section class="hero">
+<div class="hero-badge"><span class="dot"></span> Live on Base Mainnet</div>
+<h1>AgentPay</h1>
+<p>22 pay-per-call AI, crypto, and data microservices via the <strong>x402 protocol</strong>. No accounts. No API keys. Just USDC on Base.</p>
+<div class="hero-cta">
+<a href="#services" class="btn btn-primary">Explore Services</a>
+<a href="/llms.txt" class="btn btn-secondary">llms.txt</a>
+<a href="/.well-known/x402" class="btn btn-secondary">x402 Catalog</a>
+<a href="https://github.com/ronaldanton/x402-shop" class="btn btn-secondary">GitHub</a>
+</div>
+</section>
+<div class="stats">
+<div class="stat"><span class="num">GROSS</span><span class="label">Gross Revenue</span></div>
+<div class="stat"><span class="num">PAID</span><span class="label">Paid Requests</span></div>
+<div class="stat"><span class="num">22</span><span class="label">Services Live</span></div>
+<div class="stat"><span class="num">$0.005</span><span class="label">Starting Price</span></div>
+</div>
+<section class="section" id="services">
+<h2 class="section-title"><span class="icon">⚡</span> Services &amp; Pricing</h2>
+<p class="section-desc">22 endpoints across 6 categories. Every POST returns HTTP 402 with payment instructions.</p>
+<div class="services-grid">
+CARDS_PLACEHOLDER
+</div>
+</section>
+<section class="code-section">
+<h3>How It Works</h3>
+<div class="code-block">
+<span class="c"># 1. Send a request — get payment instructions</span><br>
+<span class="f">curl</span> <span class="k">-i</span> <span class="k">-X</span> POST https://agentpay.help/v1/summarize \<br>
+&nbsp;&nbsp;<span class="k">-H</span> <span class="s">'Content-Type: application/json'</span> \<br>
+&nbsp;&nbsp;<span class="k">-d</span> <span class="s">'{"text":"Your text here..."}'</span><br><br>
+<span class="c"># → HTTP 402 Payment Required</span><br>
+<span class="c"># → x402 client pays in USDC and retries automatically</span><br><br>
+<span class="c"># 2. Use x402 client (Node.js)</span><br>
+<span class="f">npm</span> i @x402/fetch viem<br>
+<span class="c"># See README for full example</span>
+</div>
+</section>
+<section class="section">
+<h2 class="section-title"><span class="icon">🛡️</span> Trust &amp; Discovery</h2>
+<p class="section-desc">AgentPay is indexed and verified across the x402 ecosystem.</p>
+<div class="trust">
+<div class="trust-item"><div class="trust-icon">📋</div><div class="trust-title">MCP Registry</div><div class="trust-desc">help.agentpay/agentpay v1.2.0</div></div>
+<div class="trust-item"><div class="trust-icon">🔍</div><div class="trust-title">x402scan</div><div class="trust-desc">Verified listing with 22 resources</div></div>
+<div class="trust-item"><div class="trust-icon">🏪</div><div class="trust-title">Poncho</div><div class="trust-desc">Auto-indexed merchant page</div></div>
+<div class="trust-item"><div class="trust-icon">📄</div><div class="trust-title">OpenAPI</div><div class="trust-desc">Full OpenAPI 3.0 spec</div></div>
+<div class="trust-item"><div class="trust-icon">🤖</div><div class="trust-title">Agent Card</div><div class="trust-desc">agent.json + llms.txt</div></div>
+<div class="trust-item"><div class="trust-icon">⛓️</div><div class="trust-title">Base Mainnet</div><div class="trust-desc">eip155:8453 settlement</div></div>
+</div>
+</section>
+<footer class="footer">
+<div class="footer-links">
+<a href="/llms.txt">llms.txt</a>
+<a href="/.well-known/x402">x402 Catalog</a>
+<a href="/openapi.json">OpenAPI</a>
+<a href="/.well-known/agent.json">Agent Card</a>
+<a href="/.well-known/mcp/server.json">MCP Server</a>
+<a href="/health">Health</a>
+<a href="/stats">Dashboard</a>
+<a href="https://github.com/ronaldanton/x402-shop">GitHub</a>
+</div>
+<div class="footer-copy">Powered by <a href="https://github.com/ronaldanton/x402-shop">x402-shop</a> · <a href="https://x402.org">x402 protocol</a> · Built on <a href="https://base.org">Base</a> · Apache-2.0 License</div>
+</footer>
+</div></body></html>
