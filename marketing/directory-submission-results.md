@@ -84,3 +84,24 @@
 4. **satring.com** — retry when their payment service recovers
 5. **Monitor** PR #14281, mcp.directory review, payapi.market review, minia2a review, x402-list review
 6. **x402scan merchant page** — verify AgentPay appears in the public index: tryponcho.com/m/agentpay.help
+
+## 2026-09-12 (later) — index verification + wire-format fixes
+
+### ✅ Confirmed live / newly indexed
+| Surface | Evidence |
+|---------|----------|
+| **x402scan (Merit Systems)** | `POST /api/trpc/public.resources.registerFromOrigin {"origin":"https://agentpay.help"}` → `success:true, registered:22, total:22, failed:0, source:"openapi", originId:"b9b6665a-037e-4fad-9bf7-6132c30058f9"`. `checkDiscovery` also returns `found:true, source:"openapi", resourceCount:22`. |
+| **CDP Bazaar (Coinbase)** | `POST https://api.cdp.coinbase.com/platform/v2/x402/validate` (no API key) → **all 22 routes `valid:true`, `simulation.outcome:"accepted"`, 0 preflight failures** (25 checks each). Report saved at `/tmp/cdp-report.json`. |
+| **MCP Registry (official)** | `io.github.ronaldanton/agentpay` — status `active`, remote `https://agentpay.help/mcp`, published 2026-09-12T19:47:50Z. |
+| **nohumans.directory** | All 4 listings flipped `unverified` → **`verified`** (score 1.0, x402 v2, 0 fails). |
+| **AgentPay hub card** | live on `my-ai-projects` (:8765). |
+
+### 🔧 Fixes shipped
+1. **Dual-format 402 (rev `bf093fc`)** — `@x402/express` v2 sends the challenge only in the base64 `payment-required` header with body `{}`; a live peer (`api.onesource.io`) puts the full challenge in **both** header and body and repeats v1 field names. Agents/indexers that read only the body saw nothing and could not pay. Our 402 body now mirrors the header and adds v1 aliases (`maxAmountRequired`, `currency`, `recipient`) plus `meta.agentpay.how_to_pay`. Verified: header==body on all sampled routes, free routes unaffected.
+2. **Generated bazaar declarations from one spec table** — every route now ships a real input/output JSON Schema and a realistic example body (CDP wants **values** in `info.input.body`, x402scan wants the schema). Descriptions gained "Use when:" guidance and stay under CDP's **500-char** hard limit (which causes verify/settle rejection). A self-inconsistent example (`minLength: 200` vs a 100-char example) was caught by CDP's own preflight and fixed.
+
+### 🚧 Remaining gates
+- **CDP Bazaar indexing** fires only after a **settled** payment through the **CDP Facilitator** (needs a CDP API key = human signup). Our facilitator is `x402.org/facilitator`, which advertises `extensions: [builder-code, eip2612GasSponsoring, erc20ApprovalGasSponsoring]` — **no bazaar** — and its own catalog paths return 404. `agentic.market` is built on Bazaar, so it follows.
+- **PayAI Bazaar** catalogs on `/verify` (no funds moved) — would require pointing `FACILITATOR_URL` at PayAI. Not done: switching the facilitator on the only working payment path is unverifiable without a funded payer.
+- **PulseMCP / Glama / Smithery / curatedmcp** — API needs a key (`api.pulsemcp.com/v0.1` → 401, Glama → 401) or an account login.
+- **Registry auth key rotated**: `/.well-known/mcp-registry-auth` now serves a fresh ed25519 key; the matching 32-byte seed is stored at `/root/.config/mcp-publisher/agentpay.key` (0600). Login verified: `login http --domain agentpay.help` → `auth_method_sub: agentpay.help`, permission `publish` on `help.agentpay/*`. Publishing under `help.agentpay/*` is blocked by the registry because the remote URL is already claimed by the live `io.github.ronaldanton/agentpay` entry — that entry is the correct one.
