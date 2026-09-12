@@ -105,3 +105,15 @@
 - **PayAI Bazaar** catalogs on `/verify` (no funds moved) — would require pointing `FACILITATOR_URL` at PayAI. Not done: switching the facilitator on the only working payment path is unverifiable without a funded payer.
 - **PulseMCP / Glama / Smithery / curatedmcp** — API needs a key (`api.pulsemcp.com/v0.1` → 401, Glama → 401) or an account login.
 - **Registry auth key rotated**: `/.well-known/mcp-registry-auth` now serves a fresh ed25519 key; the matching 32-byte seed is stored at `/root/.config/mcp-publisher/agentpay.key` (0600). Login verified: `login http --domain agentpay.help` → `auth_method_sub: agentpay.help`, permission `publish` on `help.agentpay/*`. Publishing under `help.agentpay/*` is blocked by the registry because the remote URL is already claimed by the live `io.github.ronaldanton/agentpay` entry — that entry is the correct one.
+
+## 2026-09-13 — yzfly PR, TensorBlock issue, Glama repo prep, PulseMCP status
+
+| Surface | Action | Result |
+|---|---|---|
+| yzfly/Awesome-MCP-ZH | PR filed (金融与加密货币 section, after xpaysh/awesome-x402 row) | https://github.com/yzfly/Awesome-MCP-ZH/pull/569 OPEN |
+| TensorBlock/awesome-mcp-servers | Issue-form content filed via REST (browser GH session logged out) | https://github.com/TensorBlock/awesome-mcp-servers/issues/2363 OPEN, label server-submission |
+| Glama | Repo-side prep committed: Dockerfile (node:22-alpine, stdio ENTRYPOINT, verified build + MCP initialize handshake in docker) + glama.json maintainer decl | ronaldanton/x402-shop commits on master; listing page itself requires account sign-up (captcha) — PENDING user |
+| punkpeye/awesome-mcp-servers #14281 | Progress comment posted (Dockerfile + glama.json + MCP Registry active) | comment 5649525900; badge to be added once Glama listing exists |
+| PulseMCP | Submission attempt | PAUSED since 2026-09-03 — they auto-ingest the Official MCP Registry (we are active: io.github.ronaldanton/agentpay), so no action needed until they reopen |
+
+Open PRs awaiting review: xpaysh/awesome-x402 #1353 · Recall-Kitchen/awesome-x402-mcp-services #72 · Merit-Systems/awesome-agentic-commerce #698 · Haustorium12/gold-402 #211 (bot PASSED) · punkpeye #14281 · yzfly #569. TensorBlock issue #2363 pending triage. mcpservers.org free submission pending review.
