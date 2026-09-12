@@ -9,6 +9,7 @@ import { paymentMiddleware, x402ResourceServer } from "@x402/express";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
 import { HTTPFacilitatorClient } from "@x402/core/server";
 import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
+import { mountMcp } from "./mcp-http.js";
 
 const PORT = process.env.PORT || 4021;
 const PAY_TO = process.env.SELLER_ADDRESS;      // your receiving wallet
@@ -61,19 +62,38 @@ app.get("/", (req, res) => {
 
 app.get("/.well-known/x402", (req, res) => {
   // Bazaar-style discovery: machine-readable catalog of paid endpoints
+  // Spec shape (x402scan / x402 Bazaar): version, resources, ownershipProofs
   res.json({
+    // --- x402scan spec-required fields ---
+    version: 1,
+    resources: SERVICES.map(s => `${PUBLIC_BASE}${s.path}`),
+    ownershipProofs: [PAY_TO],
+    // --- rich catalog (extra, safe for unknown consumers) ---
     name: "AgentPay",
-    description: "Pay-per-call AI microservices (x402 / MPP)",
-    website: process.env.PUBLIC_URL || `http://localhost:${PORT}`,
-    endpoints: [
-      { path: "/v1/summarize", method: "POST", price: "$0.01", description: "AI text summarization — 250-word summary of any text up to 20k chars" },
-      { path: "/v1/classify-insurance", method: "POST", price: "$0.02", description: "Insurance lead classifier — intent, urgency, line of business" },
-      { path: "/v1/extract", method: "POST", price: "$0.03", description: "Structured field extraction — key-value pairs from emails, forms, documents" },
-      { path: "/v1/insurance-analysis", method: "POST", price: "$0.10", description: "Full insurance analysis bundle — classification + extraction + summary" },
-      { path: "/v1/code-review", method: "POST", price: "$0.05", description: "AI code review — bugs, security, performance, quality analysis" },
-      { path: "/v1/sentiment", method: "POST", price: "$0.02", description: "Sentiment analysis — positive/negative/neutral with emotions and keywords" },
-      { path: "/v1/translate", method: "POST", price: "$0.03", description: "Text translation — translate to any language" },
-    ],
+    description: "Pay-per-call AI microservices (x402 / MPP). USDC on Base, no accounts or API keys.",
+    website: PUBLIC_BASE,
+    specVersion: "1.0.0",
+    protocol: "x402",
+    network: NETWORK,
+    currency: "USDC",
+    facilitator: FACILITATOR,
+    payTo: PAY_TO,
+    endpoints: SERVICES.map(s => ({
+      path: s.path,
+      method: "POST",
+      price: s.price,
+      description: s.summary,
+      body: s.body,
+      output: s.out,
+    })),
+    discovery: {
+      openapi: `${PUBLIC_BASE}/openapi.json`,
+      llms: `${PUBLIC_BASE}/llms.txt`,
+      agentCard: `${PUBLIC_BASE}/.well-known/agent.json`,
+      mcp: `${PUBLIC_BASE}/.well-known/mcp.json`,
+      health: `${PUBLIC_BASE}/health`,
+      stats: `${PUBLIC_BASE}/stats`,
+    },
   });
 });
 
@@ -132,6 +152,8 @@ app.get("/llms.txt", (req, res) => {
     `- [GitHub](${PUBLIC_BASE}/github) — source code (Apache-2.0)`,
     ``,
     `## MCP`,
+    `Remote MCP server (Streamable HTTP, no install, no auth) exposing all ${SERVICES.length} services as MCP tools: POST ${PUBLIC_BASE}/mcp`,
+    `Endpoint manifest: ${PUBLIC_BASE}/.well-known/mcp-endpoint.json | Discovery: ${PUBLIC_BASE}/.well-known/mcp.json`,
     `MCP server (stdio) that wraps all paid endpoints and handles x402 payment automatically: \`npx github:ronaldanton/x402-shop mcp-server.js\` (env: SHOP_URL=${PUBLIC_BASE}, BUYER_PRIVATE_KEY=<hex key>).`,
     ``,
     `## Example`,
@@ -157,6 +179,16 @@ app.get("/openapi.json", (req, res) => {
         },
         "x-price": s.price,
         "x-payment": { scheme: "exact", network: NETWORK, currency: "USDC" },
+        // x402scan-required: pricing metadata + protocol declaration
+        "x-payment-info": {
+          protocols: ["x402"],
+          scheme: "exact",
+          network: NETWORK,
+          currency: "USDC",
+          price: { mode: "fixed", currency: "USD", amount: String(s.price).replace("$", "") },
+          payTo: PAY_TO,
+          asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        },
         tags: ["agentpay"],
       },
     };
@@ -165,6 +197,15 @@ app.get("/openapi.json", (req, res) => {
     openapi: "3.0.3",
     info: { title: "AgentPay", version: "1.0.0", description: "Pay-per-call AI microservices via x402 (HTTP 402). USDC on Base. No accounts, no API keys.", "x-base-url": PUBLIC_BASE, contact: { name: "Ronald Anton", email: "ronaldanton@gmail.com" } },
     servers: [{ url: PUBLIC_BASE }],
+    // x402scan ownership proof (Base address that receives USDC)
+    "x-discovery": {
+      ownershipProofs: [PAY_TO],
+      discovery: {
+        x402: `${PUBLIC_BASE}/.well-known/x402`,
+        llms: `${PUBLIC_BASE}/llms.txt`,
+        mcp: `${PUBLIC_BASE}/.well-known/mcp.json`
+      }
+    },
     paths,
   });
 });
@@ -180,17 +221,80 @@ app.get("/.well-known/x402list.txt", (req, res) => {
 app.get("/.well-known/agent.json", (req, res) => {
   res.json({
     name: "AgentPay",
-    description: "Pay-per-call AI microservices (summarize, classify, extract, translate, sentiment, code-review, insurance-analysis) via x402. USDC on Base, no accounts.",
+    description: "Pay-per-call AI microservices via x402 — 22 services across AI reasoning, insurance, crypto/DeFi, security, compliance and data. USDC on Base, no accounts or API keys.",
     url: PUBLIC_BASE,
     version: "1.0.0",
     protocol: "x402",
+    network: NETWORK,
+    currency: "USDC",
+    payTo: PAY_TO,
+    contact: { name: "Ronald Anton", email: "ronaldanton@gmail.com" },
     capabilities: SERVICES.map(s => ({ id: s.path.replace("/v1/", ""), endpoint: `${PUBLIC_BASE}${s.path}`, method: "POST", price_usd: parseFloat(s.price.replace("$", "")), description: s.summary })),
-    discovery: { x402: `${PUBLIC_BASE}/.well-known/x402`, openapi: `${PUBLIC_BASE}/openapi.json`, llms: `${PUBLIC_BASE}/llms.txt` },
+    discovery: { x402: `${PUBLIC_BASE}/.well-known/x402`, openapi: `${PUBLIC_BASE}/openapi.json`, llms: `${PUBLIC_BASE}/llms.txt`, mcp: `${PUBLIC_BASE}/.well-known/mcp.json`, mcpEndpoint: `${PUBLIC_BASE}/.well-known/mcp-endpoint.json` },
+    mcp: {
+      transport: "streamable-http",
+      url: `${PUBLIC_BASE}/mcp`,
+      method: "POST",
+      auth: "none",
+      tools: SERVICES.length,
+    },
   });
 });
 
+// MCP discovery manifest (non-registry, for agent crawlers)
+app.get("/.well-known/mcp.json", (req, res) => {
+  res.json({
+    mcpServers: {
+      agentpay: {
+        // Remote server — connect over Streamable HTTP, no install required
+        type: "streamable-http",
+        url: `${PUBLIC_BASE}/mcp`,
+        description: "AgentPay remote MCP server — 22 paid x402 tools, USDC on Base, no API keys.",
+      },
+      "agentpay-stdio": {
+        // Local stdio server — pays from a local wallet
+        command: "npx",
+        args: ["-y", "github:ronaldanton/x402-shop", "mcp-server.js"],
+        env: { SHOP_URL: PUBLIC_BASE, BUYER_PRIVATE_KEY: "<hex-private-key>" },
+        description: "AgentPay MCP server (stdio) — wraps 22 paid x402 endpoints and settles USDC on Base automatically.",
+      },
+    },
+  });
+});
+
+// AI plugin manifest (ChatGPT-plugin-era convention, still read by some directories)
+app.get("/.well-known/ai-plugin.json", (req, res) => {
+  res.json({
+    schema_version: "v1",
+    name_for_human: "AgentPay",
+    name_for_model: "agentpay",
+    description_for_human: "Pay-per-call AI microservices — summarize, classify, extract, translate, code review and 17 more, paid per call in USDC on Base.",
+    description_for_model: "AgentPay exposes 22 AI/data microservices over HTTP. Every endpoint requires x402 payment (HTTP 402) settled in USDC on Base (eip155:8453). POST a JSON body to any /v1/* endpoint; you will receive a 402 with payment instructions, pay, then retry. No signup or API keys.",
+    auth: { type: "none" },
+    api: { type: "openapi", url: `${PUBLIC_BASE}/openapi.json`, is_user_authenticated: false },
+    logo_url: `${PUBLIC_BASE}/logo.png`,
+    contact_email: "ronaldanton@gmail.com",
+    legal_info_url: `${PUBLIC_BASE}/`,
+  });
+});
+
+// Security contact (RFC 9116)
+app.get("/.well-known/security.txt", (req, res) => {
+  const exp = new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString();
+  res.type("text/plain").send(
+    `Contact: mailto:ronaldanton@gmail.com\nExpires: ${exp}\nPreferred-Languages: en\nCanonical: ${PUBLIC_BASE}/.well-known/security.txt\n`
+  );
+});
+
 app.get("/sitemap.xml", (req, res) => {
-  res.type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>${PUBLIC_BASE}/</loc></url>\n</urlset>`);
+  const urls = [
+    `<url><loc>${PUBLIC_BASE}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>`,
+    ...SERVICES.map(s => `<url><loc>${PUBLIC_BASE}/#${s.path.replace("/v1/", "")}</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>`),
+    `<url><loc>${PUBLIC_BASE}/llms.txt</loc><priority>0.8</priority></url>`,
+    `<url><loc>${PUBLIC_BASE}/openapi.json</loc><priority>0.8</priority></url>`,
+    `<url><loc>${PUBLIC_BASE}/.well-known/x402</loc><priority>0.8</priority></url>`,
+  ];
+  res.type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>`);
 });
 
 app.get("/github", (req, res) => res.redirect(301, "https://github.com/ronaldanton/x402-shop"));
@@ -223,6 +327,9 @@ app.use("/.well-known/mcp", express.static(path.join(process.cwd(), ".well-known
 app.get("/.well-known/mcp-registry-auth", (req, res) => {
   res.type("application/json").send(fs.readFileSync(path.join(process.cwd(), ".well-known", "mcp-registry-auth"), "utf8"));
 });
+
+// Remote MCP server (Streamable HTTP) — exposes all 22 services as MCP tools.
+mountMcp(app, { services: SERVICES, publicBase: PUBLIC_BASE });
 app.get("/stats", (req, res) => {
   const paid = ledger.filter(e => e.status === "paid");
   res.json({

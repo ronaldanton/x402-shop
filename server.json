@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.ronaldanton/agentpay",
   "title": "AgentPay — Pay-per-call AI Microservices",
-  "description": "22 AI microservices with x402 micropayments: summarize, translate, code-review. USDC on Base.",
-  "version": "1.0.0",
+  "description": "22 pay-per-call AI microservices over x402 MCP. USDC on Base, no API keys.",
+  "version": "1.1.0",
   "websiteUrl": "https://agentpay.help",
   "repository": {
     "url": "https://github.com/ronaldanton/x402-shop",
