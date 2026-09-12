@@ -9,27 +9,6 @@
     "url": "https://github.com/ronaldanton/x402-shop",
     "source": "github"
   },
-  "packages": [
-    {
-      "identifier": "agentpay-mcp",
-      "registryType": "npm",
-      "registryBaseUrl": "https://registry.npmjs.org",
-      "transport": {
-        "type": "stdio"
-      },
-      "environmentVariables": [
-        {
-          "name": "SHOP_URL",
-          "description": "AgentPay server URL",
-          "default": "https://agentpay.help"
-        },
-        {
-          "name": "BUYER_PRIVATE_KEY",
-          "description": "Hex private key for USDC payments on Base"
-        }
-      ]
-    }
-  ],
   "remotes": [
     {
       "type": "streamable-http",

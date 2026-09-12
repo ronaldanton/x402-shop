@@ -32,6 +32,7 @@ async function ollamaChat(model, messages, maxTokens = 300) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ model, messages, stream: false, options: { num_predict: maxTokens } }),
+    signal: AbortSignal.timeout(120000),
   });
   if (!res.ok) throw new Error(`Ollama ${res.status}: ${await res.text()}`);
   const j = await res.json();
@@ -172,6 +173,10 @@ app.get("/.well-known/mcp-registry-proof.txt", (req, res) => {
   res.type("text/plain").send("v=MCPv1; k=ed25519; p=MMf+QREFKS0+DA1XrIeVVc8OfceNXybINLTJ7GivUOk=");
 });
 
+app.get("/.well-known/x402list.txt", (req, res) => {
+  res.type("text/plain").send("x402list-verify-6vneQmXfcwI1g9TvVpFR3wYx9dpCAvZ86FTKPkPum60");
+});
+
 app.get("/.well-known/agent.json", (req, res) => {
   res.json({
     name: "AgentPay",
@@ -207,7 +212,8 @@ app.post("/v1/summarize-free", async (req, res) => {
     freeRateLimit.set(ip, count + 1);
     res.json({ summary, words: summary.split(/\s+/).length, demo: true, remaining: 3 - (count + 1) });
   } catch (e) {
-    res.status(502).json({ error: "upstream AI failed" });
+    console.error("summarize-free error:", e.message, e.stack);
+    res.status(502).json({ error: "upstream AI failed", detail: e.message });
   }
 });
 
