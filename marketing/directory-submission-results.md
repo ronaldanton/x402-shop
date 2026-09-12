@@ -10,11 +10,14 @@
 | Directory | Status | Details |
 |-----------|--------|---------|
 | **x402scan** (Merit Systems) | ✅ Registered | **22 of 22 resources registered.** Merchant page: tryponcho.com/m/agentpay.help. Biggest x402 index. |
-| **MCP Registry** | ✅ Published | `io.github.ronaldanton/agentpay` v1.0.0 — remote transport `https://agentpay.help/mcp` |
+| **nohumans.directory** | ✅ 4 listings | Free programmatic submit via `POST api.nohumans.directory/v1/listings`. IDs `c83393fb-cb7` (summarize), `d6d87161-4ef` (insurance-analysis), `66bd156b-f8d` (token-safety), `ffbcbd30-c06` (extract). Probed every ~5 min; `verified` after a clean pass streak. Claim tokens saved in `marketing/nohumans-submissions.json`. |
+| **awesome-x402** (xpaysh) | ✅ PR Updated | PR #1353 — AgentPay entry updated 7 → **22 services** + remote MCP. **This list feeds agent-tools.cloud's 2,300-service crawler.** |
 | **x402 Discovery Index** | ✅ Submitted | GitHub issue #47 → https://github.com/x402-index/x402-discovery-index/issues/47 |
+| **x402-wiki** (Service Encyclopedia) | ✅ Submitted | GitHub issue #29 → https://github.com/lordbasilaiassistant-sudo/x402-wiki/issues/29. Free 402 health check + public queue. (Their paid first-party review needs the wallet funded — noted in the issue.) |
 | **mcp.directory** | ✅ Submitted | "Server Submitted!" — review within 24h |
 | **payapi.market** | ✅ Submitted | Provider ID `af39694e-ee43-4b33-9025-de2c4876d2de` — pending review. Listed 22 endpoints / 22 tools, $0.005–$0.10. |
 | **minia2a.uk** | ✅ Submitted | ID `x402-publish-1789252135272-agentpay` — pending approval. Wallet-signed publish. |
+| **MCP Registry** | ✅ Published | `io.github.ronaldanton/agentpay` v1.0.0 — remote transport `https://agentpay.help/mcp` |
 | **x402-list.com** | ✅ Submitted | ID `a6a0990c-c653-4faf-80ba-3e40ced2c56b`. 8/15 endpoints probed OK. Pending review. |
 | **awesome-mcp-servers (punkpeye)** | ✅ PR Created | PR #14281 — Finance & Fintech section |
 | **mcpservers.org** | ✅ Submitted | Form submitted via browser |
