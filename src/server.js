@@ -340,6 +340,58 @@ app.get("/stats", (req, res) => {
   });
 });
 
+// ---------- x402 v1/v2 wire-format compatibility ----------
+// @x402/express v2 puts the payment challenge ONLY in the base64 `payment-required`
+// response header and sends `{}` as the 402 body. Live peers (api.onesource.io, verified
+// 2026-09-12) put the same challenge in BOTH the header AND a full JSON body, and repeat
+// every accept field under the v2 names (asset/amount/payTo) and the v1 names
+// (currency/maxAmountRequired/recipient). Clients, indexers and LLM agents that parse the
+// 402 body alone see nothing from us, so they cannot construct a payment — lost revenue.
+// This middleware leaves the SDK header untouched (still canonical) and enriches the body.
+function enrichRequirement(accept) {
+  const a = { ...accept };
+  if (a.amount !== undefined && a.maxAmountRequired === undefined) a.maxAmountRequired = a.amount;
+  if (a.asset !== undefined && a.currency === undefined) a.currency = a.asset;
+  if (a.payTo !== undefined && a.recipient === undefined) a.recipient = a.payTo;
+  return a;
+}
+
+function paymentRequiredBodyFromHeader(headerValue) {
+  try {
+    const decoded = JSON.parse(Buffer.from(String(headerValue), "base64").toString("utf8"));
+    if (decoded && Array.isArray(decoded.accepts)) {
+      decoded.accepts = decoded.accepts.map(enrichRequirement);
+    }
+    decoded.meta = {
+      protocol: "x402",
+      agentpay: {
+        how_to_pay:
+          "Sign an EIP-3009 USDC transferWithAuthorization for accepts[0] and retry the same request with the base64 payment payload in the X-PAYMENT header. Node/TypeScript: use wrapFetchWithPayment from @x402/fetch, which handles the 402 retry automatically.",
+        mcp: `${PUBLIC_BASE}/mcp`,
+        catalogue: `${PUBLIC_BASE}/.well-known/x402`,
+        docs: `${PUBLIC_BASE}/llms.txt`
+      }
+    };
+    return decoded;
+  } catch {
+    return null;
+  }
+}
+
+app.use((req, res, next) => {
+  const originalJson = res.json.bind(res);
+  res.json = (body) => {
+    const isEmptyObject =
+      body && typeof body === "object" && !Array.isArray(body) && Object.keys(body).length === 0;
+    if (res.statusCode === 402 && isEmptyObject) {
+      const enriched = paymentRequiredBodyFromHeader(res.getHeader("payment-required"));
+      if (enriched) return originalJson(enriched);
+    }
+    return originalJson(body);
+  };
+  next();
+});
+
 // ---------- Payment middleware ----------
 const facilitatorClient = new HTTPFacilitatorClient({ url: FACILITATOR });
 app.use(
