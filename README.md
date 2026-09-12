@@ -15,6 +15,7 @@ Built with Express 5, `@x402/express`, and Ollama-served Gemma models. Live on B
 - [Quick Start](#quick-start)
 - [Architecture](#architecture)
 - [Services & Pricing](#services--pricing)
+- [MCP Server](#mcp-server)
 - [Tech Stack](#tech-stack)
 - [Deployment](#deployment)
 - [API Reference](#api-reference)
@@ -176,6 +177,59 @@ npm run buyer -- /v1/summarize ./payload.json
 | `POST /v1/insurance-analysis` | **$0.10** | ⭐ FULL BUNDLE — classification + extraction + summary in one call. |
 
 All services accept USDC on **Base mainnet** (chain ID `8453`) via the `exact` payment scheme. Testnet (Base Sepolia) is available via configuration.
+
+---
+
+## MCP Server
+
+AgentPay ships **two** Model Context Protocol servers so any MCP-capable client (Claude Desktop, Cursor, Windsurf, VS Code, Smithery hosts, …) can call the paid endpoints directly.
+
+### 1. Remote (Streamable HTTP) — no install, no API keys
+
+The live server exposes **all 22 services as MCP tools**:
+
+```
+POST https://agentpay.help/mcp
+```
+
+- Transport: **Streamable HTTP** (JSON-RPC 2.0)
+- Auth: **none** — connecting is free; the underlying endpoint is paid
+- `tools/list` → 22 tools, one per service
+
+When a tool is called, the handler performs the real HTTP request and, on **HTTP 402**, returns the **x402 v2 payment challenge** (decoded from the `PAYMENT-REQUIRED` response header) to the calling agent, along with the price and a ready-to-send `X-PAYMENT` hint. An x402-capable client pays in USDC on Base and retries to receive the result.
+
+Verify the handshake:
+
+```bash
+curl -s -X POST https://agentpay.help/mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | jq '.result.tools | length'
+# => 22
+```
+
+Discovery manifests: **`/.well-known/mcp.json`** (both servers) and **`/.well-known/mcp-endpoint.json`**.
+
+### 2. Local (stdio) — pays from a local wallet
+
+```bash
+npx github:ronaldanton/x402-shop mcp-server.js
+```
+
+| Env var | Description |
+|---------|-------------|
+| `SHOP_URL` | Base URL of the AgentPay deployment (default `https://agentpay.help`) |
+| `BUYER_PRIVATE_KEY` | Hex private key of the **buyer** wallet — the MCP server signs and settles the x402 payment automatically |
+
+This variant settles payments itself, so the MCP client needs no x402 awareness.
+
+### Registry
+
+Published to the official MCP Registry as **`io.github.ronaldanton/agentpay`** with the remote transport declared:
+
+```json
+{ "type": "streamable-http", "url": "https://agentpay.help/mcp" }
+```
 
 ---
 
