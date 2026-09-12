@@ -168,6 +168,10 @@ app.get("/openapi.json", (req, res) => {
   });
 });
 
+app.get("/.well-known/mcp-registry-proof.txt", (req, res) => {
+  res.type("text/plain").send("v=MCPv1; k=ed25519; p=MMf+QREFKS0+DA1XrIeVVc8OfceNXybINLTJ7GivUOk=");
+});
+
 app.get("/.well-known/agent.json", (req, res) => {
   res.json({
     name: "AgentPay",
@@ -185,6 +189,27 @@ app.get("/sitemap.xml", (req, res) => {
 });
 
 app.get("/github", (req, res) => res.redirect(301, "https://github.com/ronaldanton/x402-shop"));
+
+// ---------- Free demo endpoint (no paywall) ----------
+const freeRateLimit = new Map(); // ip -> count
+app.post("/v1/summarize-free", async (req, res) => {
+  const ip = req.ip || req.socket?.remoteAddress || "unknown";
+  const count = freeRateLimit.get(ip) || 0;
+  if (count >= 3) return res.status(429).json({ error: "Free limit reached (3 per session). Use /v1/summarize with x402 payment." });
+  const { text } = req.body || {};
+  if (!text || typeof text !== "string") return res.status(400).json({ error: "field 'text' required" });
+  if (text.length > 5000) return res.status(400).json({ error: "Demo limited to 5000 chars. Use /v1/summarize for full 20k." });
+  try {
+    const summary = await ollamaChat(process.env.MODEL_SUMMARIZE || "gemma3:1b", [
+      { role: "system", content: "You are a precise summarizer. Produce a crisp summary of at most 100 words. Output only the summary." },
+      { role: "user", content: text },
+    ]);
+    freeRateLimit.set(ip, count + 1);
+    res.json({ summary, words: summary.split(/\s+/).length, demo: true, remaining: 3 - (count + 1) });
+  } catch (e) {
+    res.status(502).json({ error: "upstream AI failed" });
+  }
+});
 
 // Official MCP registry discovery (registry.modelcontextprotocol.io convention)
 app.use("/.well-known/mcp", express.static(path.join(process.cwd(), ".well-known", "mcp")));
@@ -500,71 +525,258 @@ function payerOf(req) {
 
 // ---------- Landing page ----------
 const INDEX_CSS = `:root{color-scheme:dark}
-body{font-family:ui-monospace,Menlo,monospace;background:#0b0e14;color:#d5d9e0;margin:0;padding:2rem;max-width:65rem;margin-inline:auto}
-.header-row{display:flex;align-items:center;gap:1.25rem;margin-bottom:1rem}
-.logo-img{width:64px;height:64px;border-radius:0}
-h1{color:#6ee7a0;font-size:2rem;margin:0}h2{color:#9dc3ff;margin-top:2rem}
-h2 i{color:#6ee7a0;font-style:normal}
-table{border-collapse:collapse;width:100%;margin-top:1rem}
-td,th{border:1px solid #2a2f3a;padding:.5rem .75rem;text-align:left;font-size:.9rem}
-th{background:#141925;color:#9dc3ff}
-code{background:#141925;padding:.15rem .4rem;border-radius:4px}
-a{color:#6ee7a0}.stat{display:inline-block;background:#141925;border:1px solid #2a2f3a;padding:.75rem 1.25rem;border-radius:8px;margin:.25rem;min-width:9rem}
-.stat b{display:block;font-size:1.4rem;color:#6ee7a0}
-.tagline{color:#9dc3ff;font-size:1.05rem;margin-bottom:1.5rem}
-.cta{display:inline-block;background:#6ee7a0;color:#0b0e14;padding:.6rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:bold;margin-top:.5rem}
-.cta:hover{background:#5bd48a}
-.endpoints{display:grid;grid-template-columns:repeat(auto-fill,minmax(18rem,1fr));gap:.75rem;margin-top:1rem}
-.card{background:#141925;border:1px solid #2a2f3a;border-radius:8px;padding:1rem}
-.card .price{color:#6ee7a0;font-weight:bold;font-size:1.1rem}
-.card .path{color:#9dc3ff;font-family:monospace;font-size:.85rem}
-.card .desc{color:#a0a8b4;font-size:.85rem;margin-top:.35rem}
-.tag{display:inline-block;background:#1a2040;color:#6ee7a0;padding:.1rem .5rem;border-radius:4px;font-size:.75rem;margin-right:.25rem}
-.powered{text-align:center;color:#5a6270;font-size:.8rem;margin-top:3rem;border-top:1px solid #2a2f3a;padding-top:1.5rem}
+*{box-sizing:border-box}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#080b12;color:#c9cdd5;margin:0;padding:0;max-width:100%;overflow-x:hidden}
+.container{max-width:72rem;margin-inline:auto;padding:2rem 2.5rem}
+.header-row{display:flex;align-items:center;gap:1.25rem;margin-bottom:.5rem}
+.logo-img{width:72px;height:72px;border-radius:14px;box-shadow:0 0 30px rgba(110,231,160,.12)}
+h1{color:#e8fbe9;font-size:2.4rem;margin:0;letter-spacing:-.03em;font-weight:800}
+h2{color:#e0e4ec;margin-top:2.5rem;font-size:1.35rem;letter-spacing:-.02em;display:flex;align-items:center;gap:.6rem}
+h2 .icon{color:#6ee7a0;font-size:1.1rem}
+.tagline{color:#8a92a3;font-size:1.1rem;margin-bottom:1.8rem;line-height:1.6}
+.tagline b{color:#c9cdd5}
+/* Stats */
+.stats-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:2rem}
+.stat{display:inline-flex;flex-direction:column;background:linear-gradient(135deg,#101624,#0e1220);border:1px solid #1c2234;padding:.85rem 1.4rem;border-radius:12px;min-width:10rem}
+.stat b{font-size:1.5rem;color:#6ee7a0;font-weight:800;letter-spacing:-.02em}
+.stat span{color:#5a6270;font-size:.8rem;margin-top:.15rem;text-transform:uppercase;letter-spacing:.06em}
+.cta{display:inline-flex;align-items:center;gap:.4rem;background:linear-gradient(135deg,#6ee7a0,#4ad680);color:#080b12;padding:.65rem 1.6rem;border-radius:10px;text-decoration:none;font-weight:700;font-size:.95rem;margin-left:.5rem;transition:all .15s;box-shadow:0 2px 12px rgba(110,231,160,.2)}
+.cta:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(110,231,160,.3)}
+/* Category Tabs */
+.tabs{display:flex;gap:.4rem;margin-bottom:1.2rem;flex-wrap:wrap}
+.tab{background:#101624;border:1px solid #1c2234;color:#6a7386;padding:.45rem 1rem;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .15s;user-select:none}
+.tab:hover{border-color:#2a3550;color:#9dc3ff}
+.tab.active{background:#15202e;border-color:#3b5998;color:#9dc3ff;box-shadow:0 0 12px rgba(157,195,255,.08)}
+/* Service Cards */
+.endpoints{display:grid;grid-template-columns:repeat(auto-fill,minmax(20rem,1fr));gap:.7rem;margin-top:0}
+.card{background:linear-gradient(135deg,#0f1520,#0d111c);border:1px solid #1a1f30;border-radius:10px;padding:1.1rem 1.2rem;transition:border-color .15s,transform .15s}
+.card:hover{border-color:#2a3550;transform:translateY(-2px)}
+.card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+.card .price{color:#6ee7a0;font-weight:800;font-size:1.05rem;background:rgba(110,231,160,.08);padding:.15rem .55rem;border-radius:6px}
+.card .path{color:#7aabff;font-family:'SF Mono',Menlo,monospace;font-size:.8rem;word-break:break-all}
+.card .desc{color:#7a8293;font-size:.85rem;margin-top:.45rem;line-height:1.45}
+.tag{display:inline-block;background:rgba(110,231,160,.07);color:#5cc98a;padding:.12rem .5rem;border-radius:5px;font-size:.72rem;margin-top:.4rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+/* Try Free Section */
+.try-free{background:linear-gradient(135deg,#0d1a12,#0b1510);border:1px solid #1a3320;border-radius:14px;padding:1.8rem 2rem;margin-top:2.5rem}
+.try-free h3{color:#6ee7a0;margin:0 0 .6rem;font-size:1.2rem}
+.try-free p{color:#6a8a72;margin:0 0 1rem;font-size:.9rem}
+.try-free pre{background:#0a100d;border:1px solid #1a3320;border-radius:8px;padding:1rem 1.2rem;overflow-x:auto;font-size:.82rem;color:#a8d8b4;line-height:1.55}
+.try-free pre .kw{color:#6ee7a0;font-weight:700}
+.try-free pre .str{color:#d4a06a}
+.try-free pre .cmt{color:#4a6a50}
+.try-result{background:#0a100d;border:1px solid #1a3320;border-radius:8px;padding:1rem 1.2rem;margin-top:.75rem;font-size:.82rem;color:#8aaa8e;font-family:'SF Mono',Menlo,monospace;white-space:pre-wrap}
+/* Agent Integration Section */
+.agent-section{background:linear-gradient(135deg,#0d0f1a,#0a0c15);border:1px solid #1a1d30;border-radius:14px;padding:1.8rem 2rem;margin-top:2.5rem}
+.agent-section h3{color:#9dc3ff;margin:0 0 .4rem;font-size:1.2rem}
+.agent-section .agent-desc{color:#6a7080;font-size:.9rem;margin-bottom:1.2rem}
+.agent-links{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.2rem}
+.agent-link{display:inline-flex;align-items:center;gap:.3rem;background:#101624;border:1px solid #1c2234;color:#9dc3ff;padding:.4rem .8rem;border-radius:8px;text-decoration:none;font-size:.82rem;font-weight:600;transition:all .15s}
+.agent-link:hover{border-color:#3b5998;background:#15202e}
+.code-tabs{display:flex;gap:.3rem;margin-bottom:0}
+.code-tab{background:#0a0c15;border:1px solid #1a1d30;border-bottom:none;color:#5a6270;padding:.4rem .9rem;border-radius:8px 8px 0 0;cursor:pointer;font-size:.8rem;font-weight:600;transition:all .15s}
+.code-tab:hover{color:#8a92a3}
+.code-tab.active{background:#0f1320;color:#9dc3ff;border-color:#2a3550}
+.code-block{background:#0f1320;border:1px solid #1a1d30;border-radius:0 8px 8px 8px;padding:1.1rem 1.3rem;overflow-x:auto;font-size:.82rem;line-height:1.6;color:#b0b8c8;font-family:'SF Mono',Menlo,monospace;position:relative}
+.code-block .copy-btn{position:absolute;top:.6rem;right:.6rem;background:#1a1f30;border:1px solid #2a3550;color:#6a7386;padding:.3rem .6rem;border-radius:6px;cursor:pointer;font-size:.72rem;font-weight:600;transition:all .15s}
+.code-block .copy-btn:hover{background:#2a3550;color:#9dc3ff}
+.code-block .k{color:#c792ea}.code-block .s{color:#c3e88d}.code-block .c{color:#546e7a;font-style:italic}.code-block .f{color:#82aaff}.code-block .n{color:#f78c6c}
+/* Footer */
+.powered{text-align:center;color:#3a4050;font-size:.8rem;margin-top:3rem;border-top:1px solid #141824;padding-top:1.5rem}
 .powered a{color:#6ee7a0}
-pre{overflow-x:auto}
-@media(max-width:600px){.endpoints{grid-template-columns:1fr}}`;
+/* Category badge colors */
+.cat-nlp{background:rgba(110,231,160,.07);color:#5cc98a}
+.cat-finance{background:rgba(245,190,80,.07);color:#d4a06a}
+.cat-security{background:rgba(235,100,100,.07);color:#d07070}
+.cat-data{background:rgba(157,195,255,.07);color:#7aabff}
+.cat-bundle{background:rgba(200,140,255,.07);color:#b88cee}
+/* Responsive */
+@media(max-width:700px){.container{padding:1.2rem 1rem}.endpoints{grid-template-columns:1fr}.tabs{gap:.3rem}.tab{padding:.35rem .7rem;font-size:.78rem}.stats-row{gap:.4rem}.stat{min-width:7rem;padding:.6rem .9rem}.stat b{font-size:1.1rem}.agent-links{gap:.3rem}}`;
 
-const SERVICES_HTML = [
-  { path: "POST /v1/summarize", price: "$0.01", desc: "Summarize text (up to 20k chars)", tag: "text" },
-  { path: "POST /v1/classify-insurance", price: "$0.02", desc: "Insurance lead classification (intent/urgency/line)", tag: "insurance" },
-  { path: "POST /v1/sentiment", price: "$0.02", desc: "Sentiment analysis — positive/negative/neutral + emotions", tag: "nlp" },
-  { path: "POST /v1/extract", price: "$0.03", desc: "Structured field extraction from emails, forms, docs", tag: "data" },
-  { path: "POST /v1/translate", price: "$0.03", desc: "Text translation to any language", tag: "language" },
-  { path: "POST /v1/code-review", price: "$0.05", desc: "AI code review — bugs, security, performance", tag: "dev" },
-  { path: "POST /v1/insurance-analysis", price: "$0.10", desc: "⭐ FULL BUNDLE — classification + extraction + summary", tag: "bundle" },
-].map(s => `<div class="card"><span class="price">${s.price}</span> <span class="path">${s.path}</span><div class="desc">${s.desc}</div><span class="tag">${s.tag}</span></div>`).join("");
+const ALL_SERVICES_HTML = [
+  // Text / NLP
+  { path: "POST /v1/summarize", price: "$0.01", desc: "Crisp 250-word summary of any text up to 20k characters", tag: "nlp", cat: "nlp" },
+  { path: "POST /v1/sentiment", price: "$0.02", desc: "Sentiment analysis — positive/negative/neutral with emotions &amp; keywords", tag: "nlp", cat: "nlp" },
+  { path: "POST /v1/extract", price: "$0.03", desc: "Structured field extraction from emails, forms, documents", tag: "nlp", cat: "nlp" },
+  { path: "POST /v1/translate", price: "$0.03", desc: "Text translation to any language", tag: "nlp", cat: "nlp" },
+  { path: "POST /v1/content-safety", price: "$0.02", desc: "Content security scan — PII, toxicity, bias detection", tag: "nlp", cat: "nlp" },
+  { path: "POST /v1/image-describe", price: "$0.03", desc: "Vision AI — describe any image from URL", tag: "nlp", cat: "nlp" },
+  // Finance / Crypto
+  { path: "POST /v1/crypto-price", price: "$0.005", desc: "Real-time crypto prices — BTC, ETH, SOL + more", tag: "finance", cat: "finance" },
+  { path: "POST /v1/token-safety", price: "$0.02", desc: "Token safety check — rug pull risk, honeypot detection", tag: "finance", cat: "finance" },
+  { path: "POST /v1/defi-yields", price: "$0.01", desc: "DeFi yield data — APY, TVL, protocol info from DeFiLlama", tag: "finance", cat: "finance" },
+  { path: "POST /v1/wallet-risk", price: "$0.02", desc: "Wallet risk screening — OFAC sanctions, scam flags, patterns", tag: "finance", cat: "finance" },
+  { path: "POST /v1/on-chain-events", price: "$0.01", desc: "Decoded on-chain events — recent transfers &amp; calls", tag: "finance", cat: "finance" },
+  { path: "POST /v1/market-intel", price: "$0.02", desc: "Macro/economic snapshot — GDP, inflation, rates by country", tag: "finance", cat: "finance" },
+  // Security / Compliance
+  { path: "POST /v1/threat-intel", price: "$0.02", desc: "CVE/threat intelligence — vulnerability lookup &amp; severity", tag: "security", cat: "security" },
+  { path: "POST /v1/sanctions-screen", price: "$0.02", desc: "OFAC/EU sanctions screening — entity check", tag: "security", cat: "security" },
+  { path: "POST /v1/code-review", price: "$0.05", desc: "AI code review — bugs, security, performance, quality", tag: "security", cat: "security" },
+  { path: "POST /v1/agent-reputation", price: "$0.01", desc: "Agent reputation score — endpoint trustworthiness check", tag: "security", cat: "security" },
+  { path: "POST /v1/legal-lookup", price: "$0.03", desc: "Legal/regulatory lookup — company registration data", tag: "security", cat: "security" },
+  // Data / Web
+  { path: "POST /v1/web-scrape", price: "$0.01", desc: "Extract clean text from any URL — agents read web pages", tag: "data", cat: "data" },
+  { path: "POST /v1/news-feed", price: "$0.005", desc: "Real-time news feed — headlines by topic", tag: "data", cat: "data" },
+  { path: "POST /v1/weather-data", price: "$0.005", desc: "Weather data — current conditions &amp; multi-day forecast", tag: "data", cat: "data" },
+  { path: "POST /v1/classify-insurance", price: "$0.02", desc: "Insurance lead classifier — intent, urgency, line of business", tag: "data", cat: "data" },
+  // Bundle (cross-category)
+  { path: "POST /v1/insurance-analysis", price: "$0.10", desc: "⭐ FULL BUNDLE — classification + extraction + summary in one call", tag: "bundle", cat: "bundle" },
+];
+
+const catLabels = { nlp: "Text / NLP", finance: "Finance / Crypto", security: "Security / Compliance", data: "Data / Web", bundle: "Bundle" };
+const catClasses = { nlp: "cat-nlp", finance: "cat-finance", security: "cat-security", data: "cat-data", bundle: "cat-bundle" };
 
 function indexPage() {
   const gross = (ledger.filter(e=>e.status==="paid").reduce((s,e)=>s+(e.usd||0),0)).toFixed(2);
   const paid = ledger.filter(e=>e.status==="paid").length;
+
+  // Build tab HTML
+  const cats = ["all", "nlp", "finance", "security", "data", "bundle"];
+  const catLabelsAll = { all: "All Services", ...catLabels };
+  const tabsHTML = cats.map(c => `<div class="tab${c==="all"?" active":""}" data-cat="${c}">${catLabelsAll[c]}</div>`).join("");
+
+  // Build card HTML with data-cat attributes
+  const cardsHTML = ALL_SERVICES_HTML.map(s =>
+    `<div class="card" data-cat="${s.cat}"><div class="top"><span class="price">${s.price}</span></div><span class="path">${s.path}</span><div class="desc">${s.desc}</div><span class="tag ${catClasses[s.cat]||"cat-nlp"}">${catLabels[s.cat]||s.tag}</span></div>`
+  ).join("");
+
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AgentPay — AI microservices via x402</title>
+<title>AgentPay — 22 AI microservices via x402</title>
 <meta name="description" content="Pay-per-call AI services via the 402 Payment Required protocol. No accounts, no API keys — just USDC on Base.">
-<meta property="og:title" content="AgentPay — AI microservices via x402"><meta property="og:description" content="Pay-per-call AI services. No accounts. No API keys. USDC on Base.">
+<meta property="og:title" content="AgentPay — 22 AI microservices via x402"><meta property="og:description" content="Pay-per-call AI services. No accounts. No API keys. USDC on Base.">
 <meta property="og:image" content="https://agentpay.help/branding/final/og-image.png"><meta property="og:url" content="https://agentpay.help">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="AgentPay"><meta name="twitter:description" content="22 pay-per-call AI services via x402"><meta name="twitter:image" content="https://agentpay.help/branding/final/og-image.png">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"AgentPay","description":"22 pay-per-call AI microservices via x402","url":"https://agentpay.help","applicationCategory":"DeveloperApplication","author":{"@type":"Person","name":"Ronald Anton"}}</script>
 <link rel="icon" type="image/x-icon" href="/branding/final/favicon.ico">
 <link rel="apple-touch-icon" href="/branding/final/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>${INDEX_CSS}</style></head><body>
-<div class="header-row"><img src="/branding/final/logo-clean-64.png" alt="AgentPay" class="logo-img"></div>
-<p class="tagline">AI microservices behind the <b>402 Payment Required</b> protocol (x402 / MPP).<br>No accounts. No API keys. Pay per call in <b>USDC on Base</b>.</p>
-<div><div class="stat"><b>$${gross}</b>gross revenue</div><div class="stat"><b>${paid}</b>paid requests</div><div class="stat"><b>7</b>services live</div><a href="/stats" class="cta">📊 Dashboard</a></div>
-<h2><i>✦</i> Services &amp; Pricing</h2>
-<div class="endpoints">${SERVICES_HTML}</div>
-<h2><i>✦</i> Pay Like a Machine</h2>
-<pre><code># 1. Get the price — send without payment
-curl -i -X POST https://agentpay.help/v1/summarize \
-  -H 'Content-Type: application/json' -d '{"text":"Your text here..."}'
-# → HTTP 402 with payment instructions
+<div class="container">
 
-# 2. Pay &amp; get result (x402 client handles it)
-npm i @x402/fetch viem
-x402 fetch pays &amp; returns your result. See README.</code></pre>
-<h2><i>✦</i> For AI Agents</h2>
-<p>Machine-readable: <code><a href="/llms.txt">llms.txt</a></code> · <code><a href="/.well-known/x402">x402 catalog</a></code> · <code><a href="/openapi.json">OpenAPI</a></code> · <code><a href="/.well-known/agent.json">agent.json</a></code> · Health: <code><a href="/health">/health</a></code> · <a href="https://github.com/ronaldanton/x402-shop">Source (Apache-2.0)</a></p>
-<p class="powered">Powered by <a href="https://github.com/ronaldanton/x402-shop">x402-shop</a> · <a href="https://x402.org">x402 protocol</a> · Built on Base</p></body></html>`;
+<div class="header-row">
+  <img src="/branding/final/logo-clean-64.png" alt="AgentPay" class="logo-img">
+  <h1>AgentPay</h1>
+</div>
+<p class="tagline">AI microservices behind the <b>402 Payment Required</b> protocol (x402 / MPP).<br>No accounts. No API keys. Pay per call in <b>USDC on Base</b>.</p>
+
+<div class="stats-row">
+  <div class="stat"><b>$${gross}</b><span>gross revenue</span></div>
+  <div class="stat"><b>${paid}</b><span>paid requests</span></div>
+  <div class="stat"><b>22</b><span>services live</span></div>
+  <a href="/stats" class="cta">📊 Dashboard</a>
+</div>
+
+<h2><span class="icon">✦</span> Services &amp; Pricing</h2>
+<div class="tabs">${tabsHTML}</div>
+<div class="endpoints">${cardsHTML}</div>
+
+<div class="try-free">
+  <h3>⚡ Try Free — No Payment Required</h3>
+  <p>Test the summarize API instantly. This demo endpoint is free (up to 3 requests per session).</p>
+  <pre><span class="cmt"># Free summarize — no wallet needed</span>
+<span class="kw">curl</span> -X POST <span class="str">${PUBLIC_BASE}/v1/summarize-free</span> \\
+  -H <span class="str">'Content-Type: application/json'</span> \\
+  -d <span class="str">'{"text":"AgentPay is a marketplace of AI microservices. Each endpoint is paywalled via the x402 protocol, meaning clients pay USDC per request with no accounts or API keys. The platform runs on Base (L2) and uses a facilitator for instant settlement. Services include text summarization, sentiment analysis, code review, crypto safety, DeFi yields, and more."}'</span></pre>
+  <div class="try-result"><span class="cmt">// Response:</span>
+{
+  "summary": "AgentPay is a pay-per-call AI marketplace using the x402 protocol with USDC on Base...",
+  "words": 42,
+  "demo": true
+}</div>
+</div>
+
+<div class="agent-section">
+  <h3>🤖 For AI Agents</h3>
+  <p class="agent-desc">Machine-readable discovery &amp; integration. Any x402-compatible agent can discover, price, and call our endpoints automatically.</p>
+  <div class="agent-links">
+    <a href="/llms.txt" class="agent-link">📄 llms.txt</a>
+    <a href="/.well-known/x402" class="agent-link">🏪 x402 Catalog</a>
+    <a href="/openapi.json" class="agent-link">📋 OpenAPI 3.0</a>
+    <a href="/.well-known/agent.json" class="agent-link">🪪 Agent Card</a>
+    <a href="/health" class="agent-link">💚 Health</a>
+    <a href="/stats" class="agent-link">📊 Stats</a>
+    <a href="https://github.com/ronaldanton/x402-shop" class="agent-link">📦 Source (Apache-2.0)</a>
+  </div>
+
+  <div class="code-tabs">
+    <div class="code-tab active" data-lang="python">Python</div>
+    <div class="code-tab" data-lang="node">Node.js</div>
+    <div class="code-tab" data-lang="curl">curl</div>
+  </div>
+
+  <div class="code-block" id="code-python" style="display:block">
+<button class="copy-btn" onclick="copyCode('python')">Copy</button>
+<span class="c"># pip install x402-fetch viem</span>
+<span class="k">from</span> x402_fetch <span class="k">import</span> x402_fetch
+
+url = <span class="s">"${PUBLIC_BASE}/v1/summarize"</span>
+body = {<span class="s">"text"</span>: <span class="s">"Your long text to summarize..."</span>}
+
+<span class="c"># x402_fetch handles the 402 → pay → retry cycle automatically</span>
+result = x402_fetch(url, json=body)
+<span class="f">print</span>(result)</div>
+
+  <div class="code-block" id="code-node" style="display:none">
+<button class="copy-btn" onclick="copyCode('node')">Copy</button>
+<span class="c">// npm i @x402/fetch viem</span>
+<span class="k">import</span> { x402Fetch } <span class="k">from</span> <span class="s">"@x402/fetch"</span>;
+
+<span class="k">const</span> res = <span class="k">await</span> <span class="f">x402Fetch</span>(<span class="s">"${PUBLIC_BASE}/v1/summarize"</span>, {
+  method: <span class="s">"POST"</span>,
+  headers: { <span class="s">"Content-Type"</span>: <span class="s">"application/json"</span> },
+  body: JSON.stringify({ text: <span class="s">"Your long text..."</span> }),
+});
+console.<span class="f">log</span>(<span class="k">await</span> res.<span class="f">json</span>());</div>
+
+  <div class="code-block" id="code-curl" style="display:none">
+<button class="copy-btn" onclick="copyCode('curl')">Copy</button>
+<span class="c"># Step 1: Hit endpoint — get HTTP 402 with payment terms</span>
+curl -i -X POST <span class="s">${PUBLIC_BASE}/v1/summarize</span> \\
+  -H <span class="s">'Content-Type: application/json'</span> \\
+  -d <span class="s">'{"text":"Your text here..."}'</span>
+
+<span class="c"># Step 2: Pay via x402 client (handles USDC transfer + retry)</span>
+<span class="c"># Response includes your AI result after payment settles</span></div>
+</div>
+
+<p class="powered">Powered by <a href="https://github.com/ronaldanton/x402-shop">x402-shop</a> · <a href="https://x402.org">x402 protocol</a> · Built on Base</p>
+
+</div><!-- /container -->
+
+<script>
+// Category tab filtering
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const cat = tab.dataset.cat;
+    document.querySelectorAll('.card').forEach(card => {
+      card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
+    });
+  });
+});
+
+// Code tab switching
+document.querySelectorAll('.code-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.code-block').forEach(b => b.style.display = 'none');
+    document.getElementById('code-' + tab.dataset.lang).style.display = 'block';
+  });
+});
+
+// Copy button
+function copyCode(lang) {
+  const block = document.getElementById('code-' + lang);
+  const btn = block.querySelector('.copy-btn');
+  const text = block.textContent.replace('Copy', '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+</script>
+</body></html>`;
 
 }
 

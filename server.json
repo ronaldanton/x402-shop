@@ -1,0 +1,39 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.ronaldanton/agentpay",
+  "title": "AgentPay — Pay-per-call AI Microservices",
+  "description": "22 AI microservices with x402 micropayments: summarize, translate, code-review. USDC on Base.",
+  "version": "1.0.0",
+  "websiteUrl": "https://agentpay.help",
+  "repository": {
+    "url": "https://github.com/ronaldanton/x402-shop",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "identifier": "agentpay-mcp",
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "SHOP_URL",
+          "description": "AgentPay server URL",
+          "default": "https://agentpay.help"
+        },
+        {
+          "name": "BUYER_PRIVATE_KEY",
+          "description": "Hex private key for USDC payments on Base"
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://agentpay.help/mcp"
+    }
+  ]
+}
