@@ -206,9 +206,9 @@ export function mountMcp(app, opts) {
     res.json({
       schema: "mcp/endpoint/v1",
       name: "agentpay",
-      title: "AgentPay — 22 pay-per-call AI microservices via x402",
+      title: "AgentPay — 28 pay-per-call AI microservices via x402",
       description:
-        "Remote MCP server (Streamable HTTP) exposing 22 AI microservices settled in USDC on Base via the x402 protocol.",
+        "Remote MCP server (Streamable HTTP) exposing 28 AI microservices settled in USDC on Base via the x402 protocol.",
       url: `${publicBase}/mcp`,
       transport: { type: "streamable-http", url: `${publicBase}/mcp`, method: "POST" },
       auth: "none",

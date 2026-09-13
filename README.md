@@ -168,13 +168,34 @@ npm run buyer -- /v1/summarize ./payload.json
 
 | Endpoint | Price | Description |
 |----------|-------|-------------|
-| `POST /v1/summarize` | **$0.01** | Summarize text (200–20,000 chars). Returns a ~250-word summary. |
-| `POST /v1/classify-insurance` | **$0.02** | Classify insurance leads: intent, urgency, line-of-business, confidence score. |
-| `POST /v1/sentiment` | **$0.02** | Sentiment analysis: positive/negative/neutral with emotions and keywords. |
-| `POST /v1/extract` | **$0.03** | Extract structured key-value fields from raw text (emails, forms, documents). |
-| `POST /v1/translate` | **$0.03** | Text translation to any language. |
-| `POST /v1/code-review` | **$0.05** | AI code review: bugs, security issues, performance, quality analysis. |
-| `POST /v1/insurance-analysis` | **$0.10** | ⭐ FULL BUNDLE — classification + extraction + summary in one call. |
+| `POST /v1/summarize` | **$0.01** | AI text summarization — crisp 250-word summary of any text up to 20k chars |
+| `POST /v1/classify-insurance` | **$0.02** | Insurance lead classifier — intent, urgency, line of business, confidence |
+| `POST /v1/sentiment` | **$0.02** | Sentiment analysis — positive/negative/neutral with emotions and keywords |
+| `POST /v1/extract` | **$0.03** | Structured field extraction — key-value pairs from emails, forms, documents |
+| `POST /v1/translate` | **$0.03** | Text translation — translate to any language |
+| `POST /v1/code-review` | **$0.05** | AI code review — bugs, security, performance, quality score |
+| `POST /v1/insurance-analysis` | **$0.10** | Full insurance analysis bundle — classification + field extraction + summary in one call |
+| `POST /v1/token-safety` | **$0.02** | Token safety check - rug pull risk, honeypot detection, liquidity analysis |
+| `POST /v1/wallet-risk` | **$0.02** | Wallet risk screening - OFAC sanctions, scam flags, tx patterns |
+| `POST /v1/web-scrape` | **$0.01** | Extract clean text from any URL - agents read web pages |
+| `POST /v1/crypto-price` | **$0.005** | Real-time crypto prices - BTC, ETH, SOL + more |
+| `POST /v1/image-describe` | **$0.03** | Vision AI - describe any image from URL |
+| `POST /v1/defi-yields` | **$0.01** | DeFi yield data - APY, TVL, protocol info |
+| `POST /v1/threat-intel` | **$0.02** | CVE/threat intelligence - vulnerability lookup, severity |
+| `POST /v1/sanctions-screen` | **$0.02** | OFAC/EU sanctions screening - entity check |
+| `POST /v1/market-intel` | **$0.02** | Macro/economic snapshot - GDP, inflation, rates |
+| `POST /v1/on-chain-events` | **$0.01** | Decoded on-chain events - recent transfers |
+| `POST /v1/content-safety` | **$0.02** | Content security scan - PII, toxicity, bias |
+| `POST /v1/agent-reputation` | **$0.01** | Agent reputation score - endpoint trustworthiness |
+| `POST /v1/legal-lookup` | **$0.03** | Legal/regulatory lookup - company registration |
+| `POST /v1/news-feed` | **$0.005** | Real-time news feed - headlines by topic |
+| `POST /v1/weather-data` | **$0.005** | Weather data - current conditions and forecast |
+| `POST /v1/web-search` | **$0.01** | Web search - top results for any query with title, url, snippet |
+| `POST /v1/memory` | **$0.005** | Persistent key-value memory scoped to your wallet - agents remember across runs |
+| `POST /v1/geocode` | **$0.005** | Geocode place names to lat/lon; reverse geocode coordinates to addresses |
+| `POST /v1/eth-gas` | **$0.003** | Ethereum gas prices - rapid/fast/standard/slow in gwei plus ETH spot price |
+| `POST /v1/prediction-market` | **$0.01** | Polymarket prediction market odds - live probabilities for any topic |
+| `POST /v1/deep-research` | **$0.25** | PREMIUM deep research - multi-source web research into a cited markdown report |
 
 All services accept USDC on **Base mainnet** (chain ID `8453`) via the `exact` payment scheme. Testnet (Base Sepolia) is available via configuration.
 
@@ -186,7 +207,7 @@ AgentPay ships **two** Model Context Protocol servers so any MCP-capable client 
 
 ### 1. Remote (Streamable HTTP) — no install, no API keys
 
-The live server exposes **all 22 services as MCP tools**:
+The live server exposes **all 28 services as MCP tools**:
 
 ```
 POST https://agentpay.help/mcp
@@ -194,7 +215,7 @@ POST https://agentpay.help/mcp
 
 - Transport: **Streamable HTTP** (JSON-RPC 2.0)
 - Auth: **none** — connecting is free; the underlying endpoint is paid
-- `tools/list` → 22 tools, one per service
+- `tools/list` → 28 tools, one per service
 
 When a tool is called, the handler performs the real HTTP request and, on **HTTP 402**, returns the **x402 v2 payment challenge** (decoded from the `PAYMENT-REQUIRED` response header) to the calling agent, along with the price and a ready-to-send `X-PAYMENT` hint. An x402-capable client pays in USDC on Base and retries to receive the result.
 
@@ -205,7 +226,7 @@ curl -s -X POST https://agentpay.help/mcp \
   -H 'Content-Type: application/json' \
   -H 'Accept: application/json, text/event-stream' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | jq '.result.tools | length'
-# => 22
+# => 28
 ```
 
 Discovery manifests: **`/.well-known/mcp.json`** (both servers) and **`/.well-known/mcp-endpoint.json`**.

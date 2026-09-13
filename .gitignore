@@ -6,6 +6,7 @@ node_modules/
 
 # SECURITY: never commit secrets
 mainnet-wallet.json
+data/memory.json
 .env
 .env.testnet-backup
 .env.*

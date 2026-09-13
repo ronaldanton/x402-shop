@@ -124,6 +124,12 @@ const SERVICES = [
   { path: "/v1/legal-lookup", price: "$0.03", summary: "Legal/regulatory lookup - company registration", body: { query: "string (required)", jurisdiction: "string (optional)" }, out: { results: "array" } },
   { path: "/v1/news-feed", price: "$0.005", summary: "Real-time news feed - headlines by topic", body: { query: "string (required)", limit: "number (optional)" }, out: { articles: "array" } },
   { path: "/v1/weather-data", price: "$0.005", summary: "Weather data - current conditions and forecast", body: { location: "string (required)", days: "number (optional)" }, out: { location: "string", current: "object", forecast: "array" } },
+  { path: "/v1/web-search", price: "$0.01", summary: "Web search - top results for any query with title, url, snippet", body: { query: "string (required)", max_results: "number (optional, default 8)" }, out: { query: "string", results: "array of {title,url,snippet}", count: "number" } },
+  { path: "/v1/memory", price: "$0.005", summary: "Persistent key-value memory scoped to your wallet - agents remember across runs", body: { action: "get|set|delete|list (required)", key: "string (required for get/set/delete)", value: "any (required for set)", namespace: "string (optional, default 'default')" }, out: { ok: "boolean", key: "string", namespace: "string", value: "any (on get)" } },
+  { path: "/v1/geocode", price: "$0.005", summary: "Geocode place names to lat/lon; reverse geocode coordinates to addresses", body: { query: "string (required - place name or 'lat,lon')", reverse: "boolean (optional)" }, out: { results: "array of {name,country,lat,lon} (forward) | address+location (reverse)" } },
+  { path: "/v1/eth-gas", price: "$0.003", summary: "Ethereum gas prices - rapid/fast/standard/slow in gwei plus ETH spot price", body: {}, out: { eth_usd: "number", gwei: "object {rapid,fast,standard,slow}", updated_at: "string" } },
+  { path: "/v1/prediction-market", price: "$0.01", summary: "Polymarket prediction market odds - live probabilities for any topic", body: { query: "string (required)", limit: "number (optional, default 5)" }, out: { query: "string", events: "array of {title, end_date, markets:[{question,outcomes}]}" } },
+  { path: "/v1/deep-research", price: "$0.25", summary: "PREMIUM deep research - multi-source web research into a cited markdown report", body: { topic: "string (required)", depth: "standard|deep (optional, default standard)" }, out: { report: "string (markdown with inline citations)", citations: "array of {id,url,title}", stats: "object" } },
 ];
 
 app.get("/robots.txt", (req, res) => {
@@ -221,7 +227,7 @@ app.get("/.well-known/x402list.txt", (req, res) => {
 app.get("/.well-known/agent.json", (req, res) => {
   res.json({
     name: "AgentPay",
-    description: "Pay-per-call AI microservices via x402 — 22 services across AI reasoning, insurance, crypto/DeFi, security, compliance and data. USDC on Base, no accounts or API keys.",
+    description: "Pay-per-call AI microservices via x402 — 28 services across web search, agent memory, geocoding, gas, prediction markets, AI reasoning, insurance, crypto/DeFi, security, compliance and data. USDC on Base, no accounts or API keys.",
     url: PUBLIC_BASE,
     version: "1.0.0",
     protocol: "x402",
@@ -249,14 +255,14 @@ app.get("/.well-known/mcp.json", (req, res) => {
         // Remote server — connect over Streamable HTTP, no install required
         type: "streamable-http",
         url: `${PUBLIC_BASE}/mcp`,
-        description: "AgentPay remote MCP server — 22 paid x402 tools, USDC on Base, no API keys.",
+        description: "AgentPay remote MCP server — 28 paid x402 tools, USDC on Base, no API keys.",
       },
       "agentpay-stdio": {
         // Local stdio server — pays from a local wallet
         command: "npx",
         args: ["-y", "github:ronaldanton/x402-shop", "mcp-server.js"],
         env: { SHOP_URL: PUBLIC_BASE, BUYER_PRIVATE_KEY: "<hex-private-key>" },
-        description: "AgentPay MCP server (stdio) — wraps 22 paid x402 endpoints and settles USDC on Base automatically.",
+        description: "AgentPay MCP server (stdio) — wraps 28 paid x402 endpoints and settles USDC on Base automatically.",
       },
     },
   });
@@ -328,7 +334,7 @@ app.get("/.well-known/mcp-registry-auth", (req, res) => {
   res.type("application/json").send(fs.readFileSync(path.join(process.cwd(), ".well-known", "mcp-registry-auth"), "utf8"));
 });
 
-// Remote MCP server (Streamable HTTP) — exposes all 22 services as MCP tools.
+// Remote MCP server (Streamable HTTP) — exposes all 28 services as MCP tools.
 mountMcp(app, { services: SERVICES, publicBase: PUBLIC_BASE });
 app.get("/stats", (req, res) => {
   const paid = ledger.filter(e => e.status === "paid");
@@ -622,6 +628,65 @@ const ROUTE_SPECS = [
     outputExample: { location: "Dubai", current: { temp_c: 38, conditions: "clear" }, forecast: [{ date: "2026-09-13", temp_max_c: 39 }] },
     outputSchema: { type: "object", properties: { location: { type: "string" }, current: { type: "object" }, forecast: { type: "array", items: { type: "object" } } } },
   },
+  {
+    path: "/v1/web-search", price: "$0.01", serviceName: "AgentPay Web Search",
+    tags: ["search", "web", "engine", "duckduckgo", "x402"],
+    summary: "Web search: top results for any query with title, URL, and snippet.",
+    useWhen: "an agent needs current web information it was not trained on before answering.",
+    inputExample: { query: "best yield farming strategies on Base 2026", max_results: 8 },
+    inputSchema: { type: "object", properties: { query: { type: "string", minLength: 2, maxLength: 400, description: "Search query" }, max_results: { type: "number", description: "Max results 1-10, default 8" } }, required: ["query"] },
+    outputExample: { query: "best yield farming strategies on Base 2026", results: [{ title: "Yield Guide — Base", url: "https://example.com/yield-base", snippet: "Aave v3 and Morpho lead Base yields..." }], count: 1 },
+    outputSchema: { type: "object", properties: { query: { type: "string" }, results: { type: "array", items: { type: "object", properties: { title: { type: "string" }, url: { type: "string", format: "uri" }, snippet: { type: "string" } } } }, count: { type: "number" } } },
+  },
+  {
+    path: "/v1/memory", price: "$0.005", serviceName: "AgentPay Memory",
+    tags: ["memory", "storage", "state", "kv", "agents", "x402"],
+    summary: "Persistent wallet-scoped key-value memory: agents remember facts across runs.",
+    useWhen: "a stateless agent must persist context, preferences, or intermediate results between sessions.",
+    inputExample: { action: "set", key: "user_name", value: "Ronald", namespace: "prefs" },
+    inputSchema: { type: "object", properties: { action: { type: "string", enum: ["get", "set", "delete", "list"], description: "Operation" }, key: { type: "string", maxLength: 200, description: "Key (required for get/set/delete)" }, value: { description: "Value to store (required for set, any JSON)" }, namespace: { type: "string", maxLength: 50, description: "Namespace, default 'default'" } }, required: ["action"] },
+    outputExample: { ok: true, key: "user_name", namespace: "prefs", value: "Ronald" },
+    outputSchema: { type: "object", properties: { ok: { type: "boolean" }, key: { type: "string" }, namespace: { type: "string" }, value: {} } },
+  },
+  {
+    path: "/v1/geocode", price: "$0.005", serviceName: "AgentPay Geocode",
+    tags: ["geocode", "maps", "location", "coordinates", "x402"],
+    summary: "Geocode place names to coordinates, or reverse geocode coordinates to addresses.",
+    useWhen: "a workflow must convert between place names and lat/lon before calling geo-aware APIs.",
+    inputExample: { query: "Dubai" },
+    inputSchema: { type: "object", properties: { query: { type: "string", minLength: 1, description: "Place name, or 'lat,lon' for reverse lookup" }, reverse: { type: "boolean", description: "Force reverse mode, optional" } }, required: ["query"] },
+    outputExample: { query: "Dubai", reverse: false, results: [{ name: "Dubai", country: "United Arab Emirates", country_code: "AE", lat: 25.07725, lon: 55.30927, population: 3790000, timezone: "Asia/Dubai" }], count: 1 },
+    outputSchema: { type: "object", properties: { query: { type: "string" }, reverse: { type: "boolean" }, results: { type: "array", items: { type: "object" } }, address: { type: "string" }, location: { type: "object" }, count: { type: "number" } } },
+  },
+  {
+    path: "/v1/eth-gas", price: "$0.003", serviceName: "AgentPay ETH Gas",
+    tags: ["gas", "ethereum", "fees", "onchain", "x402"],
+    summary: "Ethereum gas prices: rapid, fast, standard, and slow tiers in gwei plus ETH spot price.",
+    useWhen: "an agent must time transactions or estimate fees before submitting on-chain operations.",
+    inputExample: {},
+    outputExample: { eth_usd: 2526, gwei: { rapid: 2.02, fast: 2.02, standard: 0.46, slow: 0.15 }, updated_at: "2026-09-13T00:00:00.000Z" },
+    outputSchema: { type: "object", properties: { eth_usd: { type: "number" }, gwei: { type: "object", properties: { rapid: { type: "number" }, fast: { type: "number" }, standard: { type: "number" }, slow: { type: "number" } } }, updated_at: { type: "string" } } },
+  },
+  {
+    path: "/v1/prediction-market", price: "$0.01", serviceName: "AgentPay Prediction Markets",
+    tags: ["polymarket", "prediction", "odds", "markets", "x402"],
+    summary: "Polymarket prediction market odds: live probabilities for events matching a topic.",
+    useWhen: "an agent needs crowd-sourced probability estimates for future events before deciding.",
+    inputExample: { query: "fed rate", limit: 5 },
+    inputSchema: { type: "object", properties: { query: { type: "string", minLength: 2, description: "Topic to search markets for" }, limit: { type: "number", description: "Max events 1-10, default 5" } }, required: ["query"] },
+    outputExample: { query: "fed rate", events: [{ title: "Fed rate hike in 2026?", end_date: "2026-12-31T00:00:00Z", markets: [{ question: "Fed Rate Hike by June 2026 Meeting?", outcomes: { Yes: 0.0, No: 1.0 }, volume: "128000" }] }], count: 1 },
+    outputSchema: { type: "object", properties: { query: { type: "string" }, events: { type: "array", items: { type: "object" } }, count: { type: "number" } } },
+  },
+  {
+    path: "/v1/deep-research", price: "$0.25", serviceName: "AgentPay Deep Research",
+    tags: ["research", "report", "citations", "premium", "ai", "x402"],
+    summary: "Premium deep research: searches, reads multiple sources, and writes a cited markdown report.",
+    useWhen: "you need a defensible mini-report on a topic with inline source citations, not just search links.",
+    inputExample: { topic: "state of x402 protocol adoption September 2026", depth: "standard" },
+    inputSchema: { type: "object", properties: { topic: { type: "string", minLength: 4, maxLength: 400, description: "Research topic or question" }, depth: { type: "string", enum: ["standard", "deep"], description: "standard = ~5 sources, deep = ~8 sources + wider corpus" } }, required: ["topic"] },
+    outputExample: { topic: "state of x402 protocol adoption September 2026", depth: "standard", report: "## Executive Summary\n...\n\n## Key Findings\n1. ... [S1]\n", citations: [{ id: "S1", url: "https://example.com/source", title: "Example Source" }], stats: { sources_read: 5, search_results: 5, report_words: 612 } },
+    outputSchema: { type: "object", properties: { topic: { type: "string" }, depth: { type: "string" }, report: { type: "string" }, citations: { type: "array", items: { type: "object" } }, stats: { type: "object" } } },
+  },
 ];
 
 const PAID_ROUTES = Object.fromEntries(
@@ -650,12 +715,22 @@ const PAID_ROUTES = Object.fromEntries(
   })
 );
 
-app.use(
-  paymentMiddleware(
-    PAID_ROUTES,
-    new x402ResourceServer(facilitatorClient).register(NETWORK, new ExactEvmScheme()),
-  ),
-);
+if (process.env.AGENTPAY_DEV_BYPASS === "1") {
+  // Dev-only: skip settlement entirely and identify every caller as a loopback dev payer.
+  // Production never sets this flag, so the real paywall below is always active there.
+  console.warn("[DEV] AGENTPAY_DEV_BYPASS=1 — x402 settlement DISABLED, all routes open");
+  app.use("/v1", (req, res, next) => {
+    req.x402Payment = { payer: "dev-loopback", scheme: "exact", devBypass: true };
+    next();
+  });
+} else {
+  app.use(
+    paymentMiddleware(
+      PAID_ROUTES,
+      new x402ResourceServer(facilitatorClient).register(NETWORK, new ExactEvmScheme()),
+    ),
+  );
+}
 
 // ---------- Paid services (behind the 402 paywall) ----------
 // Debug: log what the middleware attaches to req
@@ -933,12 +1008,12 @@ function indexPage() {
   ).join("");
 
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AgentPay — 22 AI microservices via x402</title>
+<title>AgentPay — 28 AI microservices via x402</title>
 <meta name="description" content="Pay-per-call AI services via the 402 Payment Required protocol. No accounts, no API keys — just USDC on Base.">
-<meta property="og:title" content="AgentPay — 22 AI microservices via x402"><meta property="og:description" content="Pay-per-call AI services. No accounts. No API keys. USDC on Base.">
+<meta property="og:title" content="AgentPay — 28 AI microservices via x402"><meta property="og:description" content="Pay-per-call AI services. No accounts. No API keys. USDC on Base.">
 <meta property="og:image" content="https://agentpay.help/branding/final/og-image.png"><meta property="og:url" content="https://agentpay.help">
-<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="AgentPay"><meta name="twitter:description" content="22 pay-per-call AI services via x402"><meta name="twitter:image" content="https://agentpay.help/branding/final/og-image.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"AgentPay","description":"22 pay-per-call AI microservices via x402","url":"https://agentpay.help","applicationCategory":"DeveloperApplication","author":{"@type":"Person","name":"Ronald Anton"}}</script>
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="AgentPay"><meta name="twitter:description" content="28 pay-per-call AI services via x402"><meta name="twitter:image" content="https://agentpay.help/branding/final/og-image.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"AgentPay","description":"28 pay-per-call AI microservices via x402","url":"https://agentpay.help","applicationCategory":"DeveloperApplication","author":{"@type":"Person","name":"Ronald Anton"}}</script>
 <link rel="icon" type="image/x-icon" href="/branding/final/favicon.ico">
 <link rel="apple-touch-icon" href="/branding/final/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -1089,6 +1164,183 @@ app.post("/v1/agent-reputation", async (req, res) => { try { const { endpoint_ur
 app.post("/v1/legal-lookup", async (req, res) => { try { const { query, jurisdiction="US" } = req.body; if(!query) return res.status(400).json({error:"query required"}); const r=await fetch(`https://api.opencorporates.com/v0.4/companies/search?q=${encodeURIComponent(query)}&jurisdiction_code=${jurisdiction.toLowerCase()}&per_page=5`,{signal:AbortSignal.timeout(10000)}); if(!r.ok) return res.status(502).json({error:"OpenCorporates error"}); const d=await r.json(); res.json({results:(d.results?.companies||[]).map(c=>({name:c.company.name,id:c.company.company_number,status:c.company.current_status,jurisdiction:c.company.jurisdiction_code}))}); } catch(e){res.status(500).json({error:e.message})} });
 app.post("/v1/news-feed", async (req, res) => { try { const { query, limit=5 } = req.body; if(!query) return res.status(400).json({error:"query required"}); const r=await fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`,{signal:AbortSignal.timeout(10000)}); if(!r.ok) return res.status(502).json({error:"News error"}); const t=await r.text(); const items=t.match(/<item>[\s\S]*?<\/item>/g)||[]; res.json({articles:items.slice(0,limit).map(i=>({title:(i.match(/<title>([\s\S]*?)<\/title>/)?.[1]||"").replace(/<!\[CDATA\[|\]\]>/g,""),source:"Google News",url:(i.match(/<link>([\s\S]*?)<\/link>/)?.[1]||"").replace(/<!\[CDATA\[|\]\]>/g,""),published:i.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1]||""}))}); } catch(e){res.status(500).json({error:e.message})} });
 app.post("/v1/weather-data", async (req, res) => { try { const { location, days=1 } = req.body; if(!location) return res.status(400).json({error:"location required"}); let lat,lon; if(location.includes(",")){[lat,lon]=location.split(",").map(Number)}else{const g=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1`,{signal:AbortSignal.timeout(8000)});if(!g.ok)return res.status(502).json({error:"Geocoding failed"});const gd=await g.json();if(!gd.results?.length)return res.status(404).json({error:"Location not found"});lat=gd.results[0].latitude;lon=gd.results[0].longitude} const w=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code&timezone=auto&forecast_days=${Math.min(days,7)}`,{signal:AbortSignal.timeout(8000)}); if(!w.ok)return res.status(502).json({error:"Weather error"}); const d=await w.json(); const wc={0:"Clear",1:"Mainly clear",2:"Partly cloudy",3:"Overcast",45:"Fog",51:"Drizzle",61:"Rain",63:"Moderate rain",65:"Heavy rain",71:"Snow",80:"Showers",95:"Thunderstorm"}; res.json({location:`${lat}, ${lon}`,current:{temp:d.current?.temperature_2m,humidity:d.current?.relative_humidity_2m,wind:d.current?.wind_speed_10m,conditions:wc[d.current?.weather_code]||"Unknown"},forecast:(d.daily?.time||[]).map((date,i)=>({date,high:d.daily.temperature_2m_max?.[i],low:d.daily.temperature_2m_min?.[i],precip:d.daily.precipitation_sum?.[i],conditions:wc[d.daily.weather_code?.[i]]||"Unknown"}))}); } catch(e){res.status(500).json({error:e.message})} });
+
+// ========== NEW SERVICES (Sep 2026): demand-driven additions ==========
+// Wallet-scoped persistent memory (the agent statefulness wedge).
+const MEMORY_FILE = path.join(process.cwd(), "data", "memory.json");
+let memoryStore = {};
+try { memoryStore = JSON.parse(fs.readFileSync(MEMORY_FILE, "utf8")); } catch { memoryStore = {}; }
+let memoryDirty = false;
+setInterval(() => {
+  if (!memoryDirty) return;
+  memoryDirty = false;
+  try {
+    fs.mkdirSync(path.dirname(MEMORY_FILE), { recursive: true });
+    fs.writeFileSync(MEMORY_FILE, JSON.stringify(memoryStore));
+  } catch (e) { console.error("[memory] persist failed:", e.message); }
+}, 5000).unref();
+
+const cleanHtml = (s) => String(s || "")
+  .replace(/<[^>]+>/g, "")
+  .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+  .replace(/&quot;/g, '"').replace(/&#x27;|&#39;/g, "'").replace(/&nbsp;/g, " ")
+  .replace(/\s+/g, " ").trim();
+
+app.post("/v1/web-search", async (req, res) => { try {
+  const { query, max_results = 8 } = req.body || {};
+  if (!query || typeof query !== "string") return res.status(400).json({ error: "query required" });
+  const r = await fetch("https://html.duckduckgo.com/html/", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0" },
+    body: new URLSearchParams({ q: query.slice(0, 400) }),
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!r.ok) return res.status(502).json({ error: `DuckDuckGo error: ${r.status}` });
+  const t = await r.text();
+  const links = [...t.matchAll(/<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)];
+  const snips = [...t.matchAll(/<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g)];
+  const results = links.slice(0, Math.min(Math.max(max_results, 1), 10)).map((m, i) => {
+    let url = m[1];
+    const uq = url.match(/[?&]uddg=([^&]+)/);
+    if (uq) { try { url = decodeURIComponent(uq[1]); } catch {} }
+    return { title: cleanHtml(m[2]), url, snippet: cleanHtml(snips[i] ? snips[i][1] : "") };
+  }).filter((o) => o.url && o.url.startsWith("http"));
+  if (!results.length) return res.status(502).json({ error: "no results parsed (upstream layout may have changed)" });
+  res.json({ query, results, count: results.length });
+  record({ ts: new Date().toISOString(), service: "web-search", status: "paid", usd: 0.01, payer: payerOf(req) });
+} catch (e) { res.status(500).json({ error: e.message }); } });
+
+app.post("/v1/memory", async (req, res) => { try {
+  const { action = "get", key, value, namespace = "default" } = req.body || {};
+  if (!["get", "set", "delete", "list"].includes(action)) return res.status(400).json({ error: "action must be get|set|delete|list" });
+  if (key !== undefined && (typeof key !== "string" || key.length > 200)) return res.status(400).json({ error: "key must be a string of at most 200 chars" });
+  const payer = payerOf(req);
+  if (!payer || payer === "unknown") return res.status(400).json({ error: "payer identity unavailable; memory is keyed to the paying wallet" });
+  const bucketKey = `${payer}::${String(namespace).slice(0, 50)}`;
+  if (action === "set") {
+    if (value === undefined) return res.status(400).json({ error: "value required for set" });
+    const vs = typeof value === "string" ? value : JSON.stringify(value);
+    if (vs.length > 100000) return res.status(400).json({ error: "value too large (max 100KB serialized)" });
+    if (!memoryStore[bucketKey]) memoryStore[bucketKey] = {};
+    const bucket = memoryStore[bucketKey];
+    if (bucket[key] === undefined && Object.keys(bucket).length >= 500) return res.status(400).json({ error: "namespace full (max 500 keys)" });
+    bucket[key] = value;
+    memoryDirty = true;
+    return res.json({ ok: true, action: "set", key, namespace, stored_chars: vs.length });
+  }
+  const bucket = memoryStore[bucketKey] || {};
+  if (action === "get") {
+    if (!(key in bucket)) return res.status(404).json({ error: "key not found", key, namespace });
+    return res.json({ ok: true, key, namespace, value: bucket[key] });
+  }
+  if (action === "delete") {
+    if (!(key in bucket)) return res.status(404).json({ error: "key not found", key, namespace });
+    delete bucket[key];
+    memoryDirty = true;
+    return res.json({ ok: true, action: "delete", key, namespace });
+  }
+  return res.json({ ok: true, action: "list", namespace, keys: Object.keys(bucket), count: Object.keys(bucket).length });
+} catch (e) { res.status(500).json({ error: e.message }); } });
+
+app.post("/v1/geocode", async (req, res) => { try {
+  const { query, reverse = false } = req.body || {};
+  if (!query || typeof query !== "string") return res.status(400).json({ error: "query required (place name or 'lat,lon')" });
+  if (reverse || /^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/.test(query.trim())) {
+    const [lat, lon] = query.split(",").map((s) => parseFloat(s.trim()));
+    if (Number.isNaN(lat) || Number.isNaN(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return res.status(400).json({ error: "invalid coordinates" });
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=jsonv2&addressdetails=1`, { headers: { "User-Agent": "AgentPay/1.0 (x402 geocoding service)" }, signal: AbortSignal.timeout(10000) });
+    if (!r.ok) return res.status(502).json({ error: "Nominatim error" });
+    const d = await r.json();
+    record({ ts: new Date().toISOString(), service: "geocode", status: "paid", usd: 0.005, payer: payerOf(req) });
+    return res.json({ query, reverse: true, address: d.display_name || null, location: { lat: parseFloat(d.lat), lon: parseFloat(d.lon) }, type: d.type, city: d.address?.city || d.address?.town || d.address?.village || null, country: d.address?.country || null, country_code: (d.address?.country_code || "").toUpperCase() || null });
+  }
+  const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query.trim())}&count=5&language=en&format=json`, { signal: AbortSignal.timeout(10000) });
+  if (!r.ok) return res.status(502).json({ error: "Open-Meteo geocoding error" });
+  const d = await r.json();
+  const results = (d.results || []).map((x) => ({ name: x.name, country: x.country, country_code: x.country_code, admin1: x.admin1, lat: x.latitude, lon: x.longitude, population: x.population, timezone: x.timezone }));
+  record({ ts: new Date().toISOString(), service: "geocode", status: "paid", usd: 0.005, payer: payerOf(req) });
+  res.json({ query, reverse: false, results, count: results.length });
+} catch (e) { res.status(500).json({ error: e.message }); } });
+
+app.post("/v1/eth-gas", async (req, res) => { try {
+  const r = await fetch("https://ethgasprice.org/api/gas", { signal: AbortSignal.timeout(10000) });
+  if (!r.ok) return res.status(502).json({ error: "gas oracle error" });
+  const d = await r.json();
+  const g = d?.data;
+  if (!g) return res.status(502).json({ error: "gas data unavailable" });
+  record({ ts: new Date().toISOString(), service: "eth-gas", status: "paid", usd: 0.003, payer: payerOf(req) });
+  res.json({ eth_usd: g.priceUSD, gwei: { rapid: g.rapid, fast: g.fast, standard: g.standard, slow: g.slow }, updated_at: new Date().toISOString() });
+} catch (e) { res.status(500).json({ error: e.message }); } });
+
+app.post("/v1/prediction-market", async (req, res) => { try {
+  const { query, limit = 5 } = req.body || {};
+  if (!query || typeof query !== "string") return res.status(400).json({ error: "query required" });
+  const r = await fetch(`https://gamma-api.polymarket.com/public-search?q=${encodeURIComponent(query.slice(0, 200))}&limit_per_type=5&events_status=active`, { signal: AbortSignal.timeout(12000) });
+  if (!r.ok) return res.status(502).json({ error: `Polymarket error: ${r.status}` });
+  const d = await r.json();
+  const parseJson = (v) => { if (typeof v !== "string") return v; try { return JSON.parse(v); } catch { return v; } };
+  const events = (d.events || []).slice(0, Math.min(Math.max(limit, 1), 10)).map((e) => ({
+    title: e.title,
+    slug: e.slug,
+    end_date: e.endDate,
+    markets: (e.markets || []).slice(0, 5).map((m) => {
+      const outcomes = parseJson(m.outcomes);
+      const prices = parseJson(m.outcomePrices);
+      const o = {};
+      if (Array.isArray(outcomes) && Array.isArray(prices)) outcomes.forEach((name, i) => { o[name] = parseFloat(prices[i]); });
+      return { question: m.question, outcomes: o, volume: m.volume };
+    }),
+  }));
+  record({ ts: new Date().toISOString(), service: "prediction-market", status: "paid", usd: 0.01, payer: payerOf(req) });
+  res.json({ query, events, count: events.length });
+} catch (e) { res.status(500).json({ error: e.message }); } });
+
+app.post("/v1/deep-research", async (req, res) => { try {
+  const { topic, depth = "standard" } = req.body || {};
+  if (!topic || typeof topic !== "string") return res.status(400).json({ error: "topic required" });
+  const perRound = depth === "deep" ? 8 : 5;
+  const readCap = depth === "deep" ? 7 : 5;
+  const steps = [];
+  const sr = await fetch("https://html.duckduckgo.com/html/", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0" },
+    body: new URLSearchParams({ q: topic.slice(0, 400) }),
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!sr.ok) return res.status(502).json({ error: `search failed: ${sr.status}` });
+  const st = await sr.text();
+  const links = [...st.matchAll(/<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)].slice(0, perRound).map((m) => {
+    let url = m[1];
+    const uq = url.match(/[?&]uddg=([^&]+)/);
+    if (uq) { try { url = decodeURIComponent(uq[1]); } catch {} }
+    return { url, title: m[2].replace(/<[^>]+>/g, "").trim() };
+  }).filter((o) => o.url && o.url.startsWith("http"));
+  steps.push({ step: "search", query: topic.slice(0, 200), results: links.length });
+  if (!links.length) return res.status(502).json({ error: "no search results for this topic" });
+  const reads = [];
+  for (const src of links.slice(0, readCap)) {
+    try {
+      const pr = await fetch(`https://r.jina.ai/${src.url}`, { headers: { "Accept": "text/plain", "X-Return-Format": "text" }, signal: AbortSignal.timeout(20000) });
+      if (!pr.ok) continue;
+      const pt = (await pr.text()).replace(/^Title:.*$/m, "").replace(/^URL Source:.*$/m, "").replace(/^Published Time:.*$/m, "").trim().slice(0, depth === "deep" ? 9000 : 6000);
+      if (pt.length > 200) reads.push({ url: src.url, title: src.title, content: pt });
+    } catch {}
+  }
+  steps.push({ step: "read_sources", read: reads.length, attempted: Math.min(links.length, readCap) });
+  if (!reads.length) return res.status(502).json({ error: "could not read any sources for this topic" });
+  const corpus = reads.map((r, i) => `[S${i + 1}] ${r.title}\n${r.content}`).join("\n\n");
+  const model = process.env.MODEL_RESEARCH || process.env.MODEL_EXTRACT || "gemma3:1b";
+  const report = await ollamaChat(model, [
+    { role: "system", content: "You are a research analyst. Write a thorough research report on the user's topic using ONLY the provided sources. Structure: ## Executive Summary (one paragraph), ## Key Findings (numbered bullets), ## Analysis (2-4 paragraphs), ## Conclusion. Cite sources inline as [S1], [S2] etc. matching the bracket numbers. End with ## Sources listing each cited source id with its title. Be factual; mark uncertainty clearly. Output markdown only." },
+    { role: "user", content: `Topic: ${topic}\n\nSources:\n\n${corpus.slice(0, 60000)}` },
+  ], 3000);
+  const citations = reads.map((r, i) => ({ id: `S${i + 1}`, url: r.url, title: r.title }));
+  record({ ts: new Date().toISOString(), service: "deep-research", status: "paid", usd: 0.25, payer: payerOf(req) });
+  res.json({ topic, depth, report, citations, stats: { sources_read: reads.length, search_results: links.length, report_words: report.split(/\s+/).filter(Boolean).length }, steps });
+} catch (e) {
+  record({ ts: new Date().toISOString(), service: "deep-research", status: "error", usd: 0, error: String(e).slice(0, 200) });
+  res.status(500).json({ error: e.message });
+} });
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`AgentPay listening on :${PORT}`);
