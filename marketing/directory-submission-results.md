@@ -128,3 +128,5 @@ Open PRs awaiting review: xpaysh/awesome-x402 #1353 · Recall-Kitchen/awesome-x4
 | awesome-x402 #1353 | body updated 7→28 services, pricing $0.003–$0.25 | pushed |
 | yzfly PR #569 | entry updated 22→28 服务, new pricing | pushed |
 | mcp-server/README/hub | counts 22→28 everywhere; README pricing table regenerated from source (28 rows) | done |
+| nohumans.directory | 6 NEW listings (web-search, memory, geocode, eth-gas, prediction-market, deep-research) + 4 legacy descriptions 22→28 | all 201/200; claim tokens in marketing/nohumans-batch2.json |
+| MCP Registry | retry publish v1.2.0 | still 403 — their DNS auth NXDOMAINs agentpay.help; v1.1.0 entry ACTIVE; retry later |

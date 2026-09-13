@@ -1,0 +1,38 @@
+{
+ "https://agentpay.help/v1/web-search": {
+  "id": "1a5230b3-1bb",
+  "claim_token": "70a64d17541c0dad33a178fd689b516e997af9fe0b026026",
+  "status": "unverified",
+  "HTTP": 201
+ },
+ "https://agentpay.help/v1/memory": {
+  "id": "4686263a-9c6",
+  "claim_token": "3b2e9a1a81a147fc4bddeca1fe62cbf1f4bed33561fe11da",
+  "status": "unverified",
+  "HTTP": 201
+ },
+ "https://agentpay.help/v1/geocode": {
+  "id": "e31a3f84-d08",
+  "claim_token": "780ff51acab0f76bced79f3fcedd68b4c9bf301135e88c42",
+  "status": "unverified",
+  "HTTP": 201
+ },
+ "https://agentpay.help/v1/eth-gas": {
+  "id": "bf1a963e-b34",
+  "claim_token": "170ba4361f1f0611c42f1a202e87474c064789c876c9768f",
+  "status": "unverified",
+  "HTTP": 201
+ },
+ "https://agentpay.help/v1/prediction-market": {
+  "id": "3b457f47-274",
+  "claim_token": "a5314243c7d2cef6cce68d410dd0fc1e976d5e8ed53a0e91",
+  "status": "unverified",
+  "HTTP": 201
+ },
+ "https://agentpay.help/v1/deep-research": {
+  "id": "85afb112-2d1",
+  "claim_token": "d63a999f271f164a00c953a9fbc0ef3054bf447b17575872",
+  "status": "unverified",
+  "HTTP": 201
+ }
+}
