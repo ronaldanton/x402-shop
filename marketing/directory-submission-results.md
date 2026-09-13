@@ -117,3 +117,14 @@
 | PulseMCP | Submission attempt | PAUSED since 2026-09-03 — they auto-ingest the Official MCP Registry (we are active: io.github.ronaldanton/agentpay), so no action needed until they reopen |
 
 Open PRs awaiting review: xpaysh/awesome-x402 #1353 · Recall-Kitchen/awesome-x402-mcp-services #72 · Merit-Systems/awesome-agentic-commerce #698 · Haustorium12/gold-402 #211 (bot PASSED) · punkpeye #14281 · yzfly #569. TensorBlock issue #2363 pending triage. mcpservers.org free submission pending review.
+
+## 2026-09-13 (later) — 6 demand-driven services added (22 → 28)
+| Surface | Action | Result |
+|---|---|---|
+| Product | Researched CDP Bazaar trials + x402scan + agent-economy demand data → built web-search ($0.01), wallet memory KV ($0.005), geocode ($0.005), eth-gas ($0.003), prediction-market ($0.01), deep-research premium ($0.25) | All handlers live-verified (dev loopback + upstreams); prod paywalled 402 on all 6; dual-format 402 body OK |
+| CDP Bazaar | Full re-validation 28 routes | 28/28 accepted |
+| x402scan | re-registerFromOrigin | 28/28 registered (originId b9b6665a…f9 unchanged) |
+| MCP Registry | version 1.1.0 → 1.2.0 re-publish | BLOCKED: registry DNS auth NXDOMAINs agentpay.help (their resolver 34.118.224.10); v1.1.0 entry still ACTIVE; retry later — HTTP login works but maps to help.agentpay/* namespace (wrong identity, not used) |
+| awesome-x402 #1353 | body updated 7→28 services, pricing $0.003–$0.25 | pushed |
+| yzfly PR #569 | entry updated 22→28 服务, new pricing | pushed |
+| mcp-server/README/hub | counts 22→28 everywhere; README pricing table regenerated from source (28 rows) | done |
