@@ -26,5 +26,12 @@
     "status": "paid",
     "usd": 0.02,
     "payer": "unknown"
+  },
+  {
+    "ts": "2026-09-13T06:22:00.605Z",
+    "service": "eth-gas",
+    "status": "paid",
+    "usd": 0.003,
+    "payer": "unknown"
   }
 ]

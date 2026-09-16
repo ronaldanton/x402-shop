@@ -10,6 +10,7 @@ import { ExactEvmScheme } from "@x402/evm/exact/server";
 import { HTTPFacilitatorClient } from "@x402/core/server";
 import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
 import { mountMcp } from "./mcp-http.js";
+import { SERVICES } from "./services.js";
 
 const PORT = process.env.PORT || 4021;
 const PAY_TO = process.env.SELLER_ADDRESS;      // your receiving wallet
@@ -101,36 +102,6 @@ app.get("/health", (req, res) => res.json({ ok: true, ts: new Date().toISOString
 
 // ---------- Agent discovery endpoints (llms.txt, OpenAPI, robots, agent card) ----------
 const PUBLIC_BASE = process.env.PUBLIC_URL || "https://agentpay.help";
-const SERVICES = [
-  { path: "/v1/summarize", price: "$0.01", summary: "AI text summarization — crisp 250-word summary of any text up to 20k chars", body: { text: "string (200-20000 chars, required)" }, out: { summary: "string", words: "number" } },
-  { path: "/v1/classify-insurance", price: "$0.02", summary: "Insurance lead classifier — intent, urgency, line of business, confidence", body: { text: "string (10-5000 chars, required)" }, out: { intent: "quote_request|renewal|claim|complaint|other", urgency: "low|medium|high", line: "auto|home|life|health|commercial|other", confidence: "number" } },
-  { path: "/v1/sentiment", price: "$0.02", summary: "Sentiment analysis — positive/negative/neutral with emotions and keywords", body: { text: "string (10-5000 chars, required)" }, out: { sentiment: "positive|negative|neutral", confidence: "number", emotions: "string[]", keywords: "string[]" } },
-  { path: "/v1/extract", price: "$0.03", summary: "Structured field extraction — key-value pairs from emails, forms, documents", body: { text: "string (required)", fields: "string[] (optional — fields to extract)" }, out: { "<field>": "value (JSON object of extracted fields)" } },
-  { path: "/v1/translate", price: "$0.03", summary: "Text translation — translate to any language", body: { text: "string (10-5000 chars, required)", targetLanguage: "string (optional, default Spanish)" }, out: { translation: "string", targetLanguage: "string" } },
-  { path: "/v1/code-review", price: "$0.05", summary: "AI code review — bugs, security, performance, quality score", body: { code: "string (10-4000 chars, required)", language: "string (optional)" }, out: { review: { issues: "array", suggestions: "array", score: "number" }, language: "string" } },
-  { path: "/v1/insurance-analysis", price: "$0.10", summary: "Full insurance analysis bundle — classification + field extraction + summary in one call", body: { text: "string (10-20000 chars, required)" }, out: { classification: "object", extracted_fields: "object", summary: "string", confidence: "number", recommended_action: "string" } },
-  { path: "/v1/token-safety", price: "$0.02", summary: "Token safety check - rug pull risk, honeypot detection, liquidity analysis", body: { address: "string (0x... required)", chain: "string (optional)" }, out: { safe: "boolean", risk_score: "number", flags: "string[]", liquidity_usd: "number", honeypot: "boolean" } },
-  { path: "/v1/wallet-risk", price: "$0.02", summary: "Wallet risk screening - OFAC sanctions, scam flags, tx patterns", body: { address: "string (0x... required)", chain: "string (optional)" }, out: { risk_level: "string", ofac_sanctioned: "boolean", total_txns: "number", risk_factors: "string[]" } },
-  { path: "/v1/web-scrape", price: "$0.01", summary: "Extract clean text from any URL - agents read web pages", body: { url: "string (required)", max_chars: "number (optional)" }, out: { title: "string", content: "string", word_count: "number" } },
-  { path: "/v1/crypto-price", price: "$0.005", summary: "Real-time crypto prices - BTC, ETH, SOL + more", body: { symbols: "string[]", vs_currency: "string (optional)" }, out: { prices: "object" } },
-  { path: "/v1/image-describe", price: "$0.03", summary: "Vision AI - describe any image from URL", body: { image_url: "string (required)", detail: "string (optional)" }, out: { description: "string", objects: "string[]" } },
-  { path: "/v1/defi-yields", price: "$0.01", summary: "DeFi yield data - APY, TVL, protocol info", body: { protocol: "string (optional)", chain: "string (optional)" }, out: { yields: "array" } },
-  { path: "/v1/threat-intel", price: "$0.02", summary: "CVE/threat intelligence - vulnerability lookup, severity", body: { cve_id: "string", keyword: "string (optional)" }, out: { cve_id: "string", severity: "string", description: "string" } },
-  { path: "/v1/sanctions-screen", price: "$0.02", summary: "OFAC/EU sanctions screening - entity check", body: { name: "string (required)", type: "string (optional)" }, out: { sanctioned: "boolean", lists: "string[]" } },
-  { path: "/v1/market-intel", price: "$0.02", summary: "Macro/economic snapshot - GDP, inflation, rates", body: { country: "string (optional)" }, out: { country: "string", data: "object" } },
-  { path: "/v1/on-chain-events", price: "$0.01", summary: "Decoded on-chain events - recent transfers", body: { address: "string (0x... required)", chain: "string (optional)" }, out: { events: "array" } },
-  { path: "/v1/content-safety", price: "$0.02", summary: "Content security scan - PII, toxicity, bias", body: { text: "string (required)" }, out: { safe: "boolean", flags: "string[]" } },
-  { path: "/v1/agent-reputation", price: "$0.01", summary: "Agent reputation score - endpoint trustworthiness", body: { endpoint_url: "string (required)" }, out: { score: "number", grade: "string" } },
-  { path: "/v1/legal-lookup", price: "$0.03", summary: "Legal/regulatory lookup - company registration", body: { query: "string (required)", jurisdiction: "string (optional)" }, out: { results: "array" } },
-  { path: "/v1/news-feed", price: "$0.005", summary: "Real-time news feed - headlines by topic", body: { query: "string (required)", limit: "number (optional)" }, out: { articles: "array" } },
-  { path: "/v1/weather-data", price: "$0.005", summary: "Weather data - current conditions and forecast", body: { location: "string (required)", days: "number (optional)" }, out: { location: "string", current: "object", forecast: "array" } },
-  { path: "/v1/web-search", price: "$0.01", summary: "Web search - top results for any query with title, url, snippet", body: { query: "string (required)", max_results: "number (optional, default 8)" }, out: { query: "string", results: "array of {title,url,snippet}", count: "number" } },
-  { path: "/v1/memory", price: "$0.005", summary: "Persistent key-value memory scoped to your wallet - agents remember across runs", body: { action: "get|set|delete|list (required)", key: "string (required for get/set/delete)", value: "any (required for set)", namespace: "string (optional, default 'default')" }, out: { ok: "boolean", key: "string", namespace: "string", value: "any (on get)" } },
-  { path: "/v1/geocode", price: "$0.005", summary: "Geocode place names to lat/lon; reverse geocode coordinates to addresses", body: { query: "string (required - place name or 'lat,lon')", reverse: "boolean (optional)" }, out: { results: "array of {name,country,lat,lon} (forward) | address+location (reverse)" } },
-  { path: "/v1/eth-gas", price: "$0.003", summary: "Ethereum gas prices - rapid/fast/standard/slow in gwei plus ETH spot price", body: {}, out: { eth_usd: "number", gwei: "object {rapid,fast,standard,slow}", updated_at: "string" } },
-  { path: "/v1/prediction-market", price: "$0.01", summary: "Polymarket prediction market odds - live probabilities for any topic", body: { query: "string (required)", limit: "number (optional, default 5)" }, out: { query: "string", events: "array of {title, end_date, markets:[{question,outcomes}]}" } },
-  { path: "/v1/deep-research", price: "$0.25", summary: "PREMIUM deep research - multi-source web research into a cited markdown report", body: { topic: "string (required)", depth: "standard|deep (optional, default standard)" }, out: { report: "string (markdown with inline citations)", citations: "array of {id,url,title}", stats: "object" } },
-];
 
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain").send(`User-agent: *\nAllow: /\n\nSitemap: ${PUBLIC_BASE}/sitemap.xml\n`);

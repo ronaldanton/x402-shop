@@ -105,15 +105,14 @@ export function createMcpServer({ services, baseUrl, pay, publicBase }) {
   return server;
 }
 
-// ── Express handler: stateless Streamable HTTP ────────────────────────────────
-export function mountMcp(app, opts) {
-  const { services, publicBase } = opts;
-
-  // Executor: pay with a configured buyer key if present, else surface the 402.
+// ── Paid-call executor ────────────────────────────────────────────────────────
+// Pay with a configured buyer key if present, else surface the live 402 challenge
+// so an x402-capable caller can sign the payment itself and retry.
+// Shared by the remote HTTP transport (mountMcp) and the stdio server.
+export function createPay({ buyerKey = process.env.AGENTPAY_BUYER_KEY } = {}) {
   let paidFetch = null;
-  const buyerKey = process.env.AGENTPAY_BUYER_KEY;
 
-  const pay = async (url, body) => {
+  return async function pay(url, body) {
     if (!paidFetch && buyerKey) {
       const [{ wrapFetchWithPayment, x402Client }, { ExactEvmScheme }, { privateKeyToAccount }] =
         await Promise.all([
@@ -163,6 +162,12 @@ export function mountMcp(app, opts) {
     if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
     return data;
   };
+}
+
+// ── Express handler: stateless Streamable HTTP ────────────────────────────────
+export function mountMcp(app, opts) {
+  const { services, publicBase } = opts;
+  const pay = createPay();
 
   const handle = async (req, res) => {
     const server = createMcpServer({
