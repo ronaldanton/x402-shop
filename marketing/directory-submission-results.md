@@ -130,3 +130,15 @@ Open PRs awaiting review: xpaysh/awesome-x402 #1353 · Recall-Kitchen/awesome-x4
 | mcp-server/README/hub | counts 22→28 everywhere; README pricing table regenerated from source (28 rows) | done |
 | nohumans.directory | 6 NEW listings (web-search, memory, geocode, eth-gas, prediction-market, deep-research) + 4 legacy descriptions 22→28 | all 201/200; claim tokens in marketing/nohumans-batch2.json |
 | MCP Registry | retry publish v1.2.0 | still 403 — their DNS auth NXDOMAINs agentpay.help; v1.1.0 entry ACTIVE; retry later |
+
+## 2026-09-16 — Glama submission unblocked (punkpeye #14281 requirement)
+| Surface | Action | Result |
+|---|---|---|
+| Glama.ai | Account created (glama@ronaldanton.com, OTP login) + "agentpay" submitted via Add Server (repo ronaldanton/x402-shop) | ACCEPTED — email "Your MCP server \"agentpay\" is pending review on Glama"; listing URL glama.ai/mcp/servers/ronaldanton/x402-shop 404s until indexed |
+| Glama repo prep | `glama.json` fixed to live schema `https://glama.ai/mcp/schemas/server.json` with string maintainers `["ronaldanton"]` (old object form + glama.schema.json 404 = silently ignored) | committed a093616, pushed |
+| License gap | Added root `LICENSE` (Apache-2.0, copyright filled) — README claimed Apache-2.0 but no LICENSE file existed | committed a093616, pushed |
+| Build/quality blocker | `mcp-server.js` exited(1) without `BUYER_PRIVATE_KEY`, so any container introspection (Glama build) saw **zero** tools → no quality badge possible. Now boots in catalog-only mode, pays lazily, returns the live x402 challenge on call | committed 25ba725, pushed |
+| Tool coverage | stdio server exposed 3 of 28 tools; catalog extracted to `src/services.js` shared by seller + `/mcp` + stdio → **28 tools** over stdio; Dockerfile ships the shared modules | committed 25ba725; verified: docker build OK, initialize+tools/list = 28 with no env vars |
+| Mail plumbing | CF Email Routing rule `glama@ronaldanton.com` → `hermes-mail-capture` worker (KV) — Glama mail readable with no mailbox | rule 8e71b0e7…, verified on welcome/OTP/pending mails |
+| punkpeye #14281 | Status comment posted (comment 5690788127) | awaiting Glama listing + badge before merge |
+| Monitoring | cron `glama-listing-followthrough` (id eed2df5518ea, every 30m, monitor scripts/glama-mail-watch.py) drives claim + badge + PR update when Glama replies | armed |
