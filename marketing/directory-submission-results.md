@@ -142,3 +142,13 @@ Open PRs awaiting review: xpaysh/awesome-x402 #1353 · Recall-Kitchen/awesome-x4
 | Mail plumbing | CF Email Routing rule `glama@ronaldanton.com` → `hermes-mail-capture` worker (KV) — Glama mail readable with no mailbox | rule 8e71b0e7…, verified on welcome/OTP/pending mails |
 | punkpeye #14281 | Status comment posted (comment 5690788127) | awaiting Glama listing + badge before merge |
 | Monitoring | cron `glama-listing-followthrough` (id eed2df5518ea, every 30m, monitor scripts/glama-mail-watch.py) drives claim + badge + PR update when Glama replies | armed |
+
+## 2026-09-16 (later) — Glama APPROVED, listing live, badge in PR
+| Surface | Action | Result |
+|---|---|---|
+| Glama review | Read approval mail from glama@ronaldanton.com (KV inbox) | APPROVED — "Your MCP server \"agentpay\" has been approved on Glama" |
+| Glama listing | https://glama.ai/mcp/servers/ronaldanton/x402-shop | **LIVE** (was 404). Shows agentpay by ronaldanton, categories AI & ML / Cryptocurrency / Blockchain, Hybrid, JS |
+| Glama checks | badge `badges/score.svg` returns 200 but renders **A – –** (license A; quality/maintenance ungraded); `/schema` says "No tools" | sandbox build/introspection has not run yet — grading is automatic and the badge self-updates |
+| punkpeye #14281 | Badge added to the entry line after the repo link (repo-wide convention) + 22→28 services + install pointer fixed (the old `npm install -g agentpay-mcp` named an npm package owned by a *different* publisher, up2itnow0822) | commit 65b2fc9 on `ronaldanton:add-agentpay`; PR head = 65b2fc9; comment 5691064601 |
+| Claim (maintainer) | Requires GitHub OAuth as `ronaldanton`. Probed the live flow: glama.ai/oauth/github/auth → github.com/login (username+password / passkey / Google / Apple) | BLOCKED — no GitHub web session or password anywhere on this host; the PAT in gh/git-credentials cannot complete a browser OAuth. /admin and /admin/dockerfile both redirect to the overview until claimed |
+| Build spec (prepared, for after the claim) | Glama generates the image itself (clone → /app → Node); form fields: Build steps `npm ci --omit=dev`, CMD arguments `node mcp-server.js`, Pinned SHA empty (use default branch) | local proof the check will pass: `docker build .` OK + stdio `initialize`/`tools/list` = 28 tools with no env vars |

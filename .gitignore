@@ -12,3 +12,7 @@ data/memory.json
 .env.*
 *.pem
 *.key
+.secrets/
+__pycache__/
+*.pyc
+scripts/__pycache__/
