@@ -160,3 +160,10 @@ Open PRs awaiting review: xpaysh/awesome-x402 #1353 · Recall-Kitchen/awesome-x4
 | Claim route | Read Glama's own `/admin` copy while signed in with the email+OTP account: "You are signed in, but Glama does not yet see you as a maintainer of this server ... Access comes from the repository itself, so there is no form to fill in. Sign in as that GitHub account and this page becomes yours immediately." | CONFIRMS the only route is GitHub OAuth as `ronaldanton` → human step (creds), nothing scriptable |
 | GitHub session search | Scanned every browser cookie DB on the host (`snap/chromium`, chrome/chromium profiles) plus the live CDP cookie store of the 9222 cloakbrowser | no `github.com` login anywhere (`github.com/login` on all attempts) — OAuth cannot be completed autonomously |
 | Check readiness re-verified | `docker build .` (cache hit, image 847c7cfb9390) plus stdio `initialize` / `tools/list` inside the container | PASS — 28 tools, no env vars → Glama's sandbox build will pass once it runs |
+
+## 2026-09-16 04:0x — placeholder/wrong-artifact sweep (README + npm link)
+| Surface | Problem | Fix |
+|---|---|---|
+| README quick start (lines 39/498) | `git clone https://github.com/your-org/AgentPay.git` + `cd AgentPay` — unfilled template placeholders; the command 404s. Glama renders the README verbatim, so the broken command was showing on the public listing | replaced with `https://github.com/ronaldanton/x402-shop.git` + `cd x402-shop` (commit 964aae3); verified via GitHub contents API (raw.githubusercontent was serving a stale CDN copy) |
+| Glama listing snapshot | still renders the pre-fix README | updates on the next scheduled crawl, or on demand via Admin → **Repository syncs** (gated behind the claim) |
+| Glama "NPM Package" resource | auto-linked `npmjs.com/package/agentpay`, which is a **name reserved by a different publisher** (AgentPay, developers@agentpay.me, agentpay.me) — not ours | `package.json` name → `x402-shop` (free on npm, verified 404) + version aligned to 1.2.0; docker build re-verified, 28 tools |
