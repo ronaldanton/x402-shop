@@ -36,8 +36,8 @@ Built with Express 5, `@x402/express`, and Ollama-served Gemma models. Live on B
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/your-org/AgentPay.git
-cd AgentPay
+git clone https://github.com/ronaldanton/x402-shop.git
+cd x402-shop
 npm install
 ```
 
@@ -495,8 +495,8 @@ Contributions are welcome! This is an open-source reference implementation of th
 ### Development Setup
 
 ```bash
-git clone https://github.com/your-org/AgentPay.git
-cd AgentPay
+git clone https://github.com/ronaldanton/x402-shop.git
+cd x402-shop
 npm install
 cp .env.example .env
 # Edit .env with your test wallet and Base Sepolia settings

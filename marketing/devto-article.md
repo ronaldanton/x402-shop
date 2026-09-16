@@ -137,7 +137,7 @@ The entire project is open source on GitHub:
 **Quick Start:**
 ```bash
 git clone https://github.com/ronaldanton/AgentPay.git
-cd AgentPay
+cd x402-shop
 npm install
 # Pull Ollama model
 ollama pull gemma4:31b-cloud
