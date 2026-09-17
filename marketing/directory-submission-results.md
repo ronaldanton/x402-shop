@@ -167,3 +167,12 @@ Open PRs awaiting review: xpaysh/awesome-x402 #1353 · Recall-Kitchen/awesome-x4
 | README quick start (lines 39/498) | `git clone https://github.com/your-org/AgentPay.git` + `cd AgentPay` — unfilled template placeholders; the command 404s. Glama renders the README verbatim, so the broken command was showing on the public listing | replaced with `https://github.com/ronaldanton/x402-shop.git` + `cd x402-shop` (commit 964aae3); verified via GitHub contents API (raw.githubusercontent was serving a stale CDN copy) |
 | Glama listing snapshot | still renders the pre-fix README | updates on the next scheduled crawl, or on demand via Admin → **Repository syncs** (gated behind the claim) |
 | Glama "NPM Package" resource | auto-linked `npmjs.com/package/agentpay`, which is a **name reserved by a different publisher** (AgentPay, developers@agentpay.me, agentpay.me) — not ours | `package.json` name → `x402-shop` (free on npm, verified 404) + version aligned to 1.2.0; docker build re-verified, 28 tools |
+
+## 2026-09-17 — Glama grade advanced (license A + maintenance C); introspection still pending
+| Surface | Action | Result |
+|---|---|---|
+| Glama badge | Read `badges/score.svg` + listing | Was `A – –`; now renders **A (license) / C (maintenance)** — Glama graded the repo side. Desc: "maintenance rated C" |
+| Glama API check | Created a Glama API key (settings/api-keys, saved to `.secrets/glama-api-key.txt`, chmod 600) and queried `GET /api/mcp/v1/servers/ronaldanton/x402-shop` | `qualityScore: null`, `tools: []` → tool-definition grade still absent; sandbox build/introspection has not run. `/schema` still says "No tools", "Capabilities have not been inspected yet" |
+| Listing / claim | `/admin` while signed in with the email+OTP account | "You are signed in, but Glama does not yet see you as a maintainer." Claim routes = GitHub OAuth as `ronaldanton` (no GitHub web session or password on this host; the parked 9222 Chrome is also at github.com/login). `/admin/dockerfile` unreachable until claimed |
+| punkpeye #14281 | Posted follow-up comment 5709215004 with the badge markdown, the current grade, the local 28-tool introspection proof, and one ask: start the Glama-side build/inspection since its config is claim-gated | PR still OPEN, MERGEABLE/CLEAN, labels has-emoji / valid-name / has-glama (all automated gates pass) |
+| Repo readiness re-verified | `docker build .` + stdio `initialize`/`tools/list` in the container | 28 tools, no env vars required — nothing repo-side blocks Glama's inspection |
